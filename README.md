@@ -3,4 +3,4 @@
 
 
 
-## 感謝項目 https://github.com/XJTLU-Geek/hht-network 的支持和幫助
+## 感謝項目 https://github.com/XJTLU-Geek/hht-network 和 https://github.com/kaijianyi/NJUCM_NET 的支持和幫助
