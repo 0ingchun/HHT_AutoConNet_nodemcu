@@ -74,7 +74,7 @@ String hht_page_html = R"(
           <input id="domain" type="text" name='domain' autocomplete="off" placeholder="运营商代码,留空则默认或无法登录">
          </div>
          <div class="form-item">
-          <input id="interval" type="text" name='interval' autocomplete="off" placeholder="自动重连时间">
+          <input id="interval" type="text" name='interval' autocomplete="off" placeholder="自动重连时间(单位：小时)，建议填写12">
          </div>
          <div class="form-item">
            <div id="">
@@ -90,9 +90,9 @@ String hht_page_html = R"(
                 <br>
                 cmcc（中國移動），unicom（中國聯通），telecom（中國電信），default（默認）
                 <br>
-                24小时制自动重连时间示例：晚上23点半自动重连，请填写 23.30
+                运营商代码示例：若干您是移动用户，请填写 cmcc
                 <br>
-                你没看错，不是冒号，就是是英文的 .
+                小时制自动重连示例：每12小时自动重连HHT，请填写 12
               </h5>
             </p>
           </div>
@@ -332,13 +332,13 @@ void DeleteHHT() {
 
 String payload = "{\"nano\":\"nano\"}";
 bool login_HHT_Flag = false;
-void HHT_Connect(String hht_domain, String hht_username, String hht_password, String hht_followerUrl, bool* p_login_HHT_Flag)
+void HHT_Connect(String s_hht_domain, String s_hht_username, String s_hht_password, String s_hht_followerUrl, bool* p_login_HHT_Flag)
 {
   if (WiFi.status() == WL_CONNECTED) {
 
     // WiFiClient c;
 	HTTPClient http;
-	http.begin(hht_followerUrl); //HTTP begin
+	http.begin(s_hht_followerUrl); //HTTP begin
 	int httpCode = http.GET();
 
 	if (httpCode > 0)
@@ -354,9 +354,11 @@ void HHT_Connect(String hht_domain, String hht_username, String hht_password, St
       // String payload = "domain=telecom&username=ffffff&password=ffffff";
       // String payload = "{\"domain\":\"telecom\",\"username\":\"ffffff\",\"password\":\"ffffff\"}";
       //payload = "{\"domain\":\"telecom\",\"username\":\"ffffff\",\"password\":\"ffffff\"}";
-      payload = "{\"domain\":\"" + hht_domain +"\",\"username\":\"" + hht_username +"\",\"password\":\"" + hht_password + "\"}";
+      payload = "{\"domain\":\"" + s_hht_domain +"\",\"username\":\"" + s_hht_username +"\",\"password\":\"" + s_hht_password + "\"}";
 
-      Serial.println("payload is OK:" + payload);
+      Serial.println("payload is OK to send:" + payload);
+
+        // delay(50);
 
       int httpResponseCode = http.POST(payload);
       if (httpResponseCode == HTTP_CODE_OK) {
@@ -397,6 +399,7 @@ void HHT_Connect(String hht_domain, String hht_username, String hht_password, St
     http.end();
   }
 }
+
 
 // bool setHHT_Flag_new = false;
 // void setHHT_new()

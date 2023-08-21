@@ -69,7 +69,7 @@ void Web_SetWifi_setup()
     Serial.print('.');
     delay(500);
 
-    if (i > 10)
+    if (i > 20)
     {
       setWiFi();
     }
@@ -133,7 +133,9 @@ void Web_SetHHT_setup()
   {
     Serial.println("Pref_HHT_Username = nano");
     setHHT();
-  }else{
+  }
+  /*
+  else{
 
   WiFi.mode(WIFI_STA);//切换为STA模式，进行入网
   WiFi.begin(PrefSSID.c_str(), PrefPassword.c_str());
@@ -154,6 +156,7 @@ void Web_SetHHT_setup()
      digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); //板载led灯闪烁
   }
   Serial.println("wifi is reconnect for set hht");
+  */
 
 
     Serial.println(Pref_HHT_Username.c_str());
@@ -170,19 +173,19 @@ Serial.println("-------wdf?------");
     hht_followerUrl = Pref_HHT_FollowerUrl.c_str();
     hht_interval = Pref_HHT_Interval.c_str();
 
-
-    HHT_Connect(Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_Domain.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
-
-Serial.println("login_HHT_Flag = " + String(login_HHT_Flag));
-
-  i = 0;
+  byte j = 0;
   while (login_HHT_Flag == false)
   {   
-    i++;
+
+      HHT_Connect(Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_Domain.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
+
+      Serial.println("login_HHT_Flag = " + String(login_HHT_Flag));
+
+    j++;
     Serial.print("。");
     delay(500);
 
-    if (i > 10)
+    if (j > 10)
     {
       Serial.println("HHT Login Failed! because Timeout 。");
       setHHT();
@@ -198,7 +201,58 @@ Serial.println("login_HHT_Flag = " + String(login_HHT_Flag));
   configTime(8 * 3600, 0, NTP1, NTP2, NTP3);
 }
 
+void Internal_HHT_Reconnect(String s_hht_interval)
+{
+  Serial.print("s_hht_interval to float = ");
+  Serial.println(s_hht_interval.toFloat());
+  Serial.print("Pref_HHT_Interval = ");
+  Serial.println(Pref_HHT_Interval.c_str());
 
+  float interval_to_ms = s_hht_interval.toFloat();
+  interval_to_ms = interval_to_ms*60*60*1000;  //小时化为毫秒
+
+  unsigned long currentMillis = millis();
+
+    if (currentMillis - previousMillis >= interval_to_ms)
+    {
+      
+      login_HHT_Flag == false;
+      byte j = 0;
+      while (login_HHT_Flag == false)
+      {   
+
+        HHT_Connect(Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_Domain.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
+      
+        j++;
+        Serial.print("!");
+        delay(1000);
+
+        // if (j > 10)
+        // {
+        //   Serial.println("HHT Login Failed! because Timeout 。");
+        //   setHHT();
+        // }
+        digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); //板载led灯闪烁
+      }
+
+      struct tm timeInfo; //声明一个结构体
+
+      if (!getLocalTime(&timeInfo))
+      { //一定要加这个条件判断，否则内存溢出
+        Serial.println("Failed to obtain time");
+      }
+
+      Serial.println("Interval Reconnect HHT Time:");
+      Serial.println(&timeInfo, "%F %T %A");
+      previousMillis = currentMillis;
+    }
+
+  // float i = s_hht_interval.toFloat();
+  // if(i > 0)
+  // {
+  //  HHT_Connect(Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_Domain.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
+  // }
+}
 //-----------------------------------SYSTEM-------------------------------------//
 
 void reset_detect()
@@ -234,7 +288,7 @@ void loop() {
     
     Web_SetWifi_loop();
     // HHT_Connect();
-    delay(3000); // seconds delay
+    // delay(3000); // seconds delay
 
     // payload = "domain=telecom&username=ffffff&password=ffffff";
     // Serial.println(payload);
@@ -246,8 +300,9 @@ void loop() {
 
     //connectNewHHT();
     //Web_SetHHT_loop();
-    delay(3000); // seconds delay
-    Serial.println(hht_interval.toFloat());
-    delay(hht_interval.toFloat());
+    // delay(3000); // seconds delay
+    // Serial.println(hht_interval.toFloat());
+    // delay(hht_interval.toFloat());
+    Internal_HHT_Reconnect(Pref_HHT_Interval.c_str());
   }
 }

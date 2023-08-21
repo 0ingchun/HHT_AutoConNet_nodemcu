@@ -218,11 +218,11 @@ bool setWiFi_Flag = false;
 void setWiFi()
 {
   initSoftAP();
-  Serial.println(PrefSSID+3);
+  // Serial.println(PrefSSID+3);
   initWebServer();
-  Serial.println(PrefSSID+4);
+  // Serial.println(PrefSSID+4);
   initDNS();
-  Serial.println(PrefSSID+5);
+  // Serial.println(PrefSSID+5);
   Serial.println("into void setWiFi()");
 
   while (setWiFi_Flag == false)
