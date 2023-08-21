@@ -3,6 +3,8 @@
 #ifndef _HHT_SET_H_
 #define _HHT_SET_H_
 
+// #include <Arduino.h>
+
 #include <WiFi.h>
 #include <esp_wifi.h>
 
@@ -13,7 +15,13 @@
 
 #include "SetWifi.h"
 
-extern String Pref_HHT_Username, Pref_HHT_Password, Pref_HHT_Domain, Pref_HHT_FollowerUrl;
+extern String Pref_HHT_Username, Pref_HHT_Password, Pref_HHT_Domain, Pref_HHT_Interval ,Pref_HHT_FollowerUrl;
+extern String hht_username, hht_password, hht_domain, hht_followerUrl ,hht_interval;
+
+// extern bool setHHT_Flag_new;
+extern bool setHHT_Flag;
+extern bool login_HHT_Flag;
+extern String payload;
 
 void hht_handleRoot();  //访问主页回调函数
 
@@ -31,8 +39,8 @@ void setHHT();
 
 void DeleteHHT();
 
-void HHT_Connect(String hht_domain, String hht_username, String hht_password, String hht_followerUrl);
+void HHT_Connect(String hht_domain, String hht_username, String hht_password, String hht_followerUrl, bool* p_login_HHT_Flag);
 
-void setHHT_new();
+// void setHHT_new();
 
 #endif

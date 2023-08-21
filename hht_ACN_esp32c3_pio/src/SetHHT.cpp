@@ -1,7 +1,7 @@
 #include "SetHHT.h"
 
 const char* hht_AP_NAME = "ESP32_HHT_AP";//Web配网模式下的AP-hht名字
-String Pref_HHT_Username, Pref_HHT_Password, Pref_HHT_Domain, Pref_HHT_FollowerUrl;
+String Pref_HHT_Username, Pref_HHT_Password, Pref_HHT_Domain, Pref_HHT_Interval ,Pref_HHT_FollowerUrl;
 
 //暂时存储hht账号密码
 
@@ -9,11 +9,13 @@ char sta_hht_followerUrl[64] = {0};
 char sta_hht_domain[32] = {0};
 char sta_hht_username[32] = {0};
 char sta_hht_password[32] = {0};
+char sta_hht_interval[16] = {0};
 
-// String hht_followerUrl = "http://10.10.16.12/api/portal/v1/login";
-// String hht_domain = "default";
-// String hht_username = "12345678900";
-// String hht_password = "123321";
+String hht_followerUrl = "http://10.10.16.12/api/portal/v1/login";
+String hht_domain = "default";
+String hht_username = "12345678900";
+String hht_password = "123321";
+String hht_interval = "5.00";
 
 
 //配网页面代码 
@@ -63,17 +65,20 @@ String hht_page_html = R"(
       <h2>H H T 参 数 配 置</h2>
       <form style='text-align: center;padding-top: 20px' name='input' action='/' method='POST'>  
          <div class="form-item">
-          <input id="username" type="text" name='ssid' autocomplete="off" placeholder="HHT名称">
+          <input id="username" type="text" name='username' autocomplete="off" placeholder="HHT名称">
          </div>
          <div class="form-item">
           <input id="password" type="password" name='password' autocomplete="off" placeholder="HHT密码">
          </div>
          <div class="form-item">
-          <input id="domain" type="domain" name='domain' autocomplete="off" placeholder="运营商代码,留空则默认或无法登录">
+          <input id="domain" type="text" name='domain' autocomplete="off" placeholder="运营商代码,留空则默认或无法登录">
+         </div>
+         <div class="form-item">
+          <input id="interval" type="text" name='interval' autocomplete="off" placeholder="自动重连时间">
          </div>
          <div class="form-item">
            <div id="">
-            <input id="send_button" type='submit' value='保存并连接'>
+            <input id="send_button" type='submit' value='保存并登录'>
            </div>
         </div>
         <div class="form-item">
@@ -84,6 +89,10 @@ String hht_page_html = R"(
                 运营商代码由若干字母组成，请参考下表，填写错误可能导致获取不到数据而无限重启
                 <br>
                 cmcc（中國移動），unicom（中國聯通），telecom（中國電信），default（默認）
+                <br>
+                24小时制自动重连时间示例：晚上23点半自动重连，请填写 23.30
+                <br>
+                你没看错，不是冒号，就是是英文的 .
               </h5>
             </p>
           </div>
@@ -124,13 +133,13 @@ void hht_initDNS(void){//初始化DNS服务器
 }
 
 void hht_handleRootPost() {//Post回调函数
-    String hhtuser="",hhtpass="",hhtdomain="";
-    Serial.println("handleRootPost");
+    String hhtuser="",hhtpass="",hhtdomain="",hhtfollowerUrl="",hhtinterval="";
+    Serial.println("hht_handleRootPost");
 
 
-    if (hht_server.hasArg("ssid")) {//判断是否有账号参数
+    if (hht_server.hasArg("username")) {//判断是否有账号参数
     Serial.print("got username:");
-    strcpy(sta_hht_username, hht_server.arg("ssid").c_str());//将账号参数拷贝到sta_ssid中
+    strcpy(sta_hht_username, hht_server.arg("username").c_str());//将账号参数拷贝到sta_ssid中
     Serial.println(sta_hht_username);
     } else {//没有参数
     Serial.println("error, not found username");
@@ -160,20 +169,35 @@ void hht_handleRootPost() {//Post回调函数
     return;
     }
 
+    if (hht_server.hasArg("interval")) {
+    Serial.print("got domain:");
+    strcpy(sta_hht_interval, hht_server.arg("interval").c_str());
+    Serial.println(sta_hht_interval);
+    } else {
+    Serial.println("error, not found interval");
+    hht_server.send(200, "text/html", "<meta charset='UTF-8'>提示：请输入自动重连时间");
+    return;
+    }
+
 
     Preferences prefs; 
     prefs.begin("hht");
-    hhtuser = sta_hht_username; hhtpass = sta_hht_password; hhtdomain = sta_hht_domain;
-    prefs.putString( "ssid" ,hhtuser);
-    prefs.putString( "password", hhtpass);
-    prefs.putString( "domain", hhtdomain);
-    prefs.end();
+    hhtuser = sta_hht_username; hhtpass = sta_hht_password; hhtdomain = sta_hht_domain; hhtinterval = sta_hht_interval;
+    prefs.putString( "hht_username" ,hhtuser);
+    prefs.putString( "hht_password", hhtpass);
+    prefs.putString( "hht_domain", hhtdomain);
+    prefs.putString( "hht_interval", hhtinterval);
+    prefs.putString( "hht_followerUrl", hht_followerUrl);
 
-    hht_server.send(200, "text/html", "<meta charset='UTF-8'><h1>保存成功，ESP32重启中...</h1>");//返回保存成功页面
+    prefs.end();
+    Serial.println("Get HHT_PREFerences Success!");
+
+    hht_server.send(200, "text/html", "<meta charset='UTF-8'><h1>保存HHT成功，ESP32重启中...</h1>");//返回保存成功页面
     delay(2000);
     //连接wifi
     //connectNewWifi();
 
+  Serial.println("ESP32 restart...");
   ESP.restart(); //重启ESP32
 }
 
@@ -184,30 +208,47 @@ void hht_initWebServer(void){//初始化WebServer
     hht_server.onNotFound(hht_handleRoot);//设置无法响应的http请求的回调函数
     hht_server.on("/", HTTP_POST, hht_handleRootPost);//设置Post请求回调函数
     hht_server.begin();//启动WebServer
-    Serial.println("WebServer started!");
+    Serial.println("hht_WebServer started!");
 }
 
 void connectNewHHT(void){
-Preferences prefs;
-    prefs.begin("hht");
+    
+    Preferences prefs;
+  prefs.begin("hht");
+  if (prefs.isKey("hht_username"),"nano")
+    Pref_HHT_Username = prefs.getString("hht_username","nano");//如果键值为空，返回0
+  if (prefs.isKey("hht_password"))
+    Pref_HHT_Password = prefs.getString("hht_password");
+  if (prefs.isKey("hht_domain"))
+    Pref_HHT_Domain = prefs.getString("hht_domain");
+  if (prefs.isKey("hht_interval"))
+    Pref_HHT_Interval = prefs.getString("hht_interval");
+  prefs.end();
 
-    if(prefs.isKey("ssid"))
-    Pref_HHT_Username =  prefs.getString("ssid");
-    Serial.println(Pref_HHT_Username);
+// Preferences prefs;
+//     prefs.begin("hht");
 
-    if(prefs.isKey("password"))
-    Pref_HHT_Password =  prefs.getString("password");
-    Serial.println(Pref_HHT_Password);
+//     if(prefs.isKey("hht_usename"))
+//     Pref_HHT_Username =  prefs.getString("hht_username");
+//     Serial.println(Pref_HHT_Username);
 
-    if(prefs.isKey("domain"))
-    Pref_HHT_Domain = prefs.getString("domain");
-    Serial.println(Pref_HHT_Password);
+//     if(prefs.isKey("hht_password"))
+//     Pref_HHT_Password =  prefs.getString("hht_password");
+//     Serial.println(Pref_HHT_Password);
 
-    if(prefs.isKey("followerurl"))
-    Pref_HHT_FollowerUrl = prefs.getString("followerurl");
-    Serial.println(Pref_HHT_FollowerUrl);
+//     if(prefs.isKey("hht_domain"))
+//     Pref_HHT_Domain = prefs.getString("hht_domain");
+//     Serial.println(Pref_HHT_Domain);
 
-    prefs.end();
+//     if(prefs.isKey("hht_interval"))
+//     Pref_HHT_Interval = prefs.getString("hht_interval");
+//     Serial.println(Pref_HHT_Interval);
+
+//     if(prefs.isKey("hht_followerurl"))
+//     Pref_HHT_FollowerUrl = prefs.getString("hht_followerurl");
+//     Serial.println(Pref_HHT_FollowerUrl);
+
+//     prefs.end();
 
     //  WiFi.mode(WIFI_STA);
     //  WiFi.begin(Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str());
@@ -217,28 +258,35 @@ Preferences prefs;
     WiFi.setAutoConnect(true);//设置自动连接
 
     Serial.println("");
-    Serial.print("Connect to wifi");
+    Serial.print("Connect to wifi because of setHHT.");
 
     int count = 0;
-    while (WiFi.status() != WL_CONNECTED) {
+    while (setHHT_Flag == false) {
         delay(500);
         count++;
         if(count > 20){//如果10秒内（计数20次）没有连上，就开启Web配网 可适当调整这个时间
-          setHHT();
+            setWiFi();
         }
-        Serial.print(".");
+        Serial.print(".!");
     }
     Serial.println("");
 
     Pref_HHT_FollowerUrl = "http://10.10.16.12/api/portal/v1/login";
-    HHT_Connect(Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_Domain.c_str(), Pref_HHT_FollowerUrl.c_str());
 
-    if(WiFi.status() == WL_CONNECTED){
-        Serial.println("HHT Connected!");
-        Serial.print("IP address: ");
-        Serial.println(WiFi.localIP());
-        hht_server.stop();
-    }
+    hht_username = Pref_HHT_Username.c_str();
+    hht_password = Pref_HHT_Password.c_str();
+    hht_domain = Pref_HHT_Domain.c_str();
+    hht_followerUrl = Pref_HHT_FollowerUrl.c_str();
+    //HHT_Connect(Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_Domain.c_str(), Pref_HHT_FollowerUrl.c_str());
+
+    // if(WiFi.status() == WL_CONNECTED){
+    //     Serial.println("HHT Connected!");
+    //     Serial.print("IP address: ");
+    //     Serial.println(WiFi.localIP());
+    //     hht_server.stop();
+    // }
+    HHT_Connect(hht_domain, hht_username, hht_password, hht_followerUrl, &setHHT_Flag);
+
 }
 
 
@@ -252,7 +300,7 @@ void setHHT()
     {
         hht_server.handleClient();
         hht_dnsServer.processNextRequest();
-        if (WiFi.status() == WL_CONNECTED)
+        if (login_HHT_Flag == true)
         {
             hht_server.stop();
             setHHT_Flag = true;
@@ -266,9 +314,10 @@ void DeleteHHT() {
     prefs.begin("hht",false);//为false才能删除键值
     Serial.println(prefs.freeEntries());//查询清除前的剩余空间
     prefs.remove("hht_followerurl");
-    prefs.remove("hht_domain"); // 删除当前命名空间中键名为"ssid"的元素
     prefs.remove("hht_username");
     prefs.remove("hht_password"); // 删除当前命名空间中键名为"passwd"的元素
+    prefs.remove("hht_domain"); // 删除当前命名空间中键名为"ssid"的元素
+    prefs.remove("hht_interval"); 
     prefs.clear();
     delay(500);
     Serial.println(prefs.freeEntries());//查询清除后的剩余空间
@@ -281,9 +330,9 @@ void DeleteHHT() {
 //----------------------------------LOGIN_HHT-----------------------------------//
 
 
-String payload;
-
-void HHT_Connect(String hht_domain, String hht_username, String hht_password, String hht_followerUrl)
+String payload = "{\"nano\":\"nano\"}";
+bool login_HHT_Flag = false;
+void HHT_Connect(String hht_domain, String hht_username, String hht_password, String hht_followerUrl, bool* p_login_HHT_Flag)
 {
   if (WiFi.status() == WL_CONNECTED) {
 
@@ -305,59 +354,70 @@ void HHT_Connect(String hht_domain, String hht_username, String hht_password, St
       // String payload = "domain=telecom&username=ffffff&password=ffffff";
       // String payload = "{\"domain\":\"telecom\",\"username\":\"ffffff\",\"password\":\"ffffff\"}";
       //payload = "{\"domain\":\"telecom\",\"username\":\"ffffff\",\"password\":\"ffffff\"}";
-          payload = "{\"domain\":\"" + hht_domain +"\",\"username\":\"" + hht_username +"\",\"password\":\"" + hht_password + "\"}";
+      payload = "{\"domain\":\"" + hht_domain +"\",\"username\":\"" + hht_username +"\",\"password\":\"" + hht_password + "\"}";
 
-      Serial.println(payload);
+      Serial.println("payload is OK:" + payload);
 
       int httpResponseCode = http.POST(payload);
       if (httpResponseCode == HTTP_CODE_OK) {
         String response = http.getString();
 
-        int count = 0;
-        while ( ! (response.indexOf("\"reply_code\": 0") != -1 ) )
-        {
-          delay(500);
-          count++;
-          if(count > 20){//如果10秒内（计数20次）没有连上，就开启Web配网 可适当调整这个时间
-            setHHT_new();
-          }
-          Serial.print(".");
-        }
+        // int count = 0;
+        // while ( ! (response.indexOf("\"reply_code\": 0") != -1 ) )
+        // {
+        //   delay(500);
+        //   count++;
+        //   if(count > 20){//如果10秒内（计数20次）没有连上，就开启Web配网 可适当调整这个时间
+        //     //setHHT_new();
+        //   }
+        //   Serial.print(".");
+        // }
         
         if (response.indexOf("\"reply_code\": 0") != -1) {
           Serial.println("登录成功");
+          *p_login_HHT_Flag = true;
         }
         else {
           Serial.println("登录失败");
+          *p_login_HHT_Flag = false;
         }
       }
       else {
         Serial.println("HTTP request failed");
+        *p_login_HHT_Flag = false;
       }
 		}
 	}
 	else
 	{
 		Serial.printf("HTTP Get Error: %s\n", http.errorToString(httpCode).c_str());
+    Serial.println("");
+    *p_login_HHT_Flag = false;
 	}
     http.end();
   }
 }
 
-bool setHHT_Flag_new = false;
-void setHHT_new()
-{
-    hht_initSoftAP();
-    hht_initWebServer();
-    hht_initDNS();
-    while (setHHT_Flag_new == false)
-    {
-        hht_server.handleClient();
-        hht_dnsServer.processNextRequest();
-        if (WiFi.status() == WL_CONNECTED)
-        {
-            hht_server.stop();
-            setHHT_Flag_new = true;
-        }
-    }
-}
+// bool setHHT_Flag_new = false;
+// void setHHT_new()
+// {
+//     hht_initSoftAP();
+//     hht_initWebServer();
+//     hht_initDNS();
+//     while (setHHT_Flag_new == false)
+//     {
+//         hht_server.handleClient();
+//         hht_dnsServer.processNextRequest();
+
+//         connectNewHHT();
+//               Serial.println("setHHT_Flag_new = " + setHHT_Flag_new);
+
+//         while (setHHT_Flag_new == true)
+//         {
+//             Serial.println("hht connect ok");
+//             hht_server.stop();
+//             // setHHT_Flag_new = true;
+//         }
+//         // else setHHT_Flag_new = false;
+//     }
+// }

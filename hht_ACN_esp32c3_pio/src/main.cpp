@@ -36,6 +36,7 @@ void Web_SetWifi_setup()
   //delay(10);
   pinMode(LED_BUILTIN, OUTPUT); //板载led灯作为指示
   pinMode(resetPin, INPUT_PULLUP);      //按键上拉输入模式(默认高电平输入,按下时下拉接到低电平)
+  reset_detect();
   //首次使用自动进入配网模式,读取NVS存储空间内的ssid、password和citycode
   Preferences prefs;
   prefs.begin("wifi");
@@ -49,6 +50,7 @@ void Web_SetWifi_setup()
 
   if (PrefSSID == "nano")
   {
+    //Serial.println(PrefSSID + "1");
     setWiFi();
   }else{
     Serial.println(PrefSSID);
@@ -105,32 +107,36 @@ void Web_SetWifi_loop()
 void Web_SetHHT_setup()
 {
   // Serial.begin(115200);
-  // delay(10);
-  pinMode(LED_WORK_PIN, OUTPUT); //板载led灯作为指示
-  pinMode(resetPin, LED_WORK_PIN);      //按键上拉输入模式(默认高电平输入,按下时下拉接到低电平)
+  //delay(10);
+  pinMode(LED_BUILTIN, OUTPUT); //板载led灯作为指示
+  pinMode(resetPin, INPUT_PULLUP);      //按键上拉输入模式(默认高电平输入,按下时下拉接到低电平)
+  reset_detect();
   //首次使用自动进入配网模式,读取NVS存储空间内的ssid、password和citycode
   Preferences prefs;
-  prefs.begin("wifi");
-  if (prefs.isKey("ssid"),"nano")
-    Pref_HHT_Username = prefs.getString("ssid","nano");//如果键值为空，返回0
-  
-  if (prefs.isKey("password"))
-    Pref_HHT_Password = prefs.getString("password");
+  prefs.begin("hht");
+  if (prefs.isKey("hht_username"),"nano")
+    Pref_HHT_Username = prefs.getString("hht_username","nano");//如果键值为空，返回0
+  if (prefs.isKey("hht_password"))
+    Pref_HHT_Password = prefs.getString("hht_password");
+  if (prefs.isKey("hht_domain"))
+    Pref_HHT_Domain = prefs.getString("hht_domain");
+  if (prefs.isKey("hht_interval"))
+    Pref_HHT_Interval = prefs.getString("hht_interval");
+  if (prefs.isKey("hht_followerurl"))
+    Pref_HHT_FollowerUrl = prefs.getString("hht_followerurl");
 
-  if (prefs.isKey("citycode"))
-    Pref_HHT_Domain = prefs.getString("citycode");
-
-  prefs.end();//从nvs获取到wifi信息后，关闭Preferences
+    if (!(prefs.isKey("hht_followerurl"))){
+      Pref_HHT_FollowerUrl = "http://10.10.16.12/api/portal/v1/login";}
+  prefs.end();  //从nvs获取到wifi信息后，关闭Preferences
 
   if (Pref_HHT_Username == "nano")
   {
+    Serial.println("Pref_HHT_Username = nano");
     setHHT();
   }else{
-    Serial.println(Pref_HHT_Username);
-    Serial.println(Pref_HHT_Password);
-    Serial.println(Pref_HHT_Domain);
+
   WiFi.mode(WIFI_STA);//切换为STA模式，进行入网
-  // WiFi.begin(PrefSSID.c_str(), PrefPassword.c_str());
+  WiFi.begin(PrefSSID.c_str(), PrefPassword.c_str());
   Serial.println("正在连接" + PrefSSID + "...Connecting to WiFi...");
   Serial.println("-------------");
   }
@@ -143,49 +149,62 @@ void Web_SetHHT_setup()
 
     if (i > 10)
     {
+      setWiFi();
+    }
+     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); //板载led灯闪烁
+  }
+  Serial.println("wifi is reconnect for set hht");
+
+
+    Serial.println(Pref_HHT_Username.c_str());
+    Serial.println(Pref_HHT_Password.c_str());
+    Serial.println(Pref_HHT_Domain.c_str());
+    Serial.println(Pref_HHT_FollowerUrl.c_str());
+    Serial.println(Pref_HHT_Interval.c_str());
+
+Serial.println("-------wdf?------");
+
+    hht_username = Pref_HHT_Username.c_str();
+    hht_password = Pref_HHT_Password.c_str();
+    hht_domain = Pref_HHT_Domain.c_str();
+    hht_followerUrl = Pref_HHT_FollowerUrl.c_str();
+    hht_interval = Pref_HHT_Interval.c_str();
+
+
+    HHT_Connect(Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_Domain.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
+
+Serial.println("login_HHT_Flag = " + String(login_HHT_Flag));
+
+  i = 0;
+  while (login_HHT_Flag == false)
+  {   
+    i++;
+    Serial.print("。");
+    delay(500);
+
+    if (i > 10)
+    {
+      Serial.println("HHT Login Failed! because Timeout 。");
       setHHT();
     }
      digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); //板载led灯闪烁
   }
+
+  Serial.println("void Web_SetHHT_setup(): HHT Login Success!");
+
   Serial.printf("SSID:%s\r\n", WiFi.SSID().c_str());
   Serial.printf("PSW:%s\r\n", WiFi.psk().c_str());
   Serial.println(WiFi.localIP());
   configTime(8 * 3600, 0, NTP1, NTP2, NTP3);
 }
 
-void Web_SetHHT_loop()
-{
-  
-  unsigned long currentMillis = millis();
-  if (currentMillis - previousMillis >= interval)
-  {
-    ledState = !ledState; //状态翻转
-    digitalWrite(LED_BUILTIN, ledState);
 
-    struct tm timeInfo; //声明一个结构体
-    if (!getLocalTime(&timeInfo))
-    { //一定要加这个条件判断，否则内存溢出
-      Serial.println("Failed to obtain time");
-    }
-    Serial.println(&timeInfo, "%F %T %A");
-    previousMillis = currentMillis;
-  }
-  if(!digitalRead(resetPin)){
-      delay(3000);
-      if(!digitalRead(resetPin)){ //1Kde 下来电阻，10K的拉不动  
-          Serial.println("\n按键已长按3秒,正在清空NVS保存的信息.");  
-          DeleteHHT();    //删除保存的wifi信息 
-          ESP.restart();    //重启复位esp32
-          Serial.println("已重启设备.");
-      }      
-  }
-}
-
+//-----------------------------------SYSTEM-------------------------------------//
 
 void reset_detect()
 {
   if(!digitalRead(resetPin)){
-    delay(3000);
+    delay(2000);
     if(!digitalRead(resetPin)){ //1Kde 下来电阻，10K的拉不动  
         Serial.println("\n按键已长按3秒,正在清空NVS保存的信息.");
         DeleteHHT();
@@ -199,10 +218,13 @@ void reset_detect()
 //------------------------------------------------------------------------//
 
 void setup() {
+
   Serial.begin(115200);
   delay(10);
   Web_SetWifi_setup();
   //WiFi_Connect();
+
+  Web_SetHHT_setup();
 }
 
 void loop() {
@@ -218,11 +240,14 @@ void loop() {
     // Serial.println(payload);
     
     //payload = "{\"domain\":\"" + hht_domain +"\",\"username\":\"" + hht_username +"\",\"password\":\"" + hht_password + "\"}";
-    //Serial.println(payload);
+    Serial.println(payload);
 
-    setHHT_new();
-    connectNewHHT();
+    //setHHT_new();
+
+    //connectNewHHT();
     //Web_SetHHT_loop();
     delay(3000); // seconds delay
+    Serial.println(hht_interval.toFloat());
+    delay(hht_interval.toFloat());
   }
 }

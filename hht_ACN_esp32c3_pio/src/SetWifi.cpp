@@ -157,6 +157,7 @@ String wifiid="",wifipass="",cityid="";
   //连接wifi
   //connectNewWifi();
 
+  Serial.println("ESP32 restart...");
   ESP.restart(); //重启ESP32
 }
 void initWebServer(void){//初始化WebServer
@@ -168,6 +169,7 @@ void initWebServer(void){//初始化WebServer
   server.begin();//启动WebServer
   Serial.println("WebServer started!");
 }
+
 
 void connectNewWifi(void){
 Preferences prefs; 
@@ -195,10 +197,11 @@ Preferences prefs;
     delay(500);
     count++;
     if(count > 20){//如果10秒内（计数20次）没有连上，就开启Web配网 可适当调整这个时间
-      initSoftAP();
-      initWebServer();
-      initDNS();
-      break;//跳出 防止无限初始化
+      // initSoftAP();
+      // initWebServer();
+      // initDNS();
+      // break;//跳出 防止无限初始化
+      setWiFi();
     }
     Serial.print(".");
   }
@@ -215,18 +218,28 @@ bool setWiFi_Flag = false;
 void setWiFi()
 {
   initSoftAP();
+  Serial.println(PrefSSID+3);
   initWebServer();
+  Serial.println(PrefSSID+4);
   initDNS();
+  Serial.println(PrefSSID+5);
+  Serial.println("into void setWiFi()");
+
   while (setWiFi_Flag == false)
   {
     server.handleClient();
+    // Serial.println(PrefSSID+6);
     dnsServer.processNextRequest();
+    // Serial.println(PrefSSID+7);
     if (WiFi.status() == WL_CONNECTED)
     {
+      // Serial.println(PrefSSID+8);
       server.stop();
+      // Serial.println(PrefSSID+9);
       setWiFi_Flag = true;
     }
   }
+  // Serial.println(PrefSSID+10);
 }
 //删除保存的wifi信息
 void DeleteWiFi(){
