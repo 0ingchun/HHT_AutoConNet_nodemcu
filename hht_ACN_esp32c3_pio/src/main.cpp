@@ -126,7 +126,8 @@ void Web_SetHHT_setup()
     Pref_HHT_FollowerUrl = prefs.getString("hht_followerurl");
 
     if (!(prefs.isKey("hht_followerurl"))){
-      Pref_HHT_FollowerUrl = "http://10.10.16.12/api/portal/v1/login";}
+      Pref_HHT_FollowerUrl = "http://10.10.16.12/api/portal/v1/login";
+      }
   prefs.end();  //从nvs获取到wifi信息后，关闭Preferences
 
   if (Pref_HHT_Username == "nano")
@@ -167,6 +168,8 @@ void Web_SetHHT_setup()
 
 Serial.println("-------wdf?------");
 
+login_HHT_Flag = true;
+
     hht_username = Pref_HHT_Username.c_str();
     hht_password = Pref_HHT_Password.c_str();
     hht_domain = Pref_HHT_Domain.c_str();
@@ -201,6 +204,7 @@ Serial.println("-------wdf?------");
   configTime(8 * 3600, 0, NTP1, NTP2, NTP3);
 }
 
+
 void Internal_HHT_Reconnect(String s_hht_interval)
 {
   Serial.print("s_hht_interval to float = ");
@@ -215,13 +219,15 @@ void Internal_HHT_Reconnect(String s_hht_interval)
 
     if (currentMillis - previousMillis >= interval_to_ms)
     {
+      Serial.println("Interval_HHT_Reconnect():  Start to Reconnect HHT!");
       
       login_HHT_Flag == false;
       byte j = 0;
       while (login_HHT_Flag == false)
       {   
 
-        HHT_Connect(Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_Domain.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
+        HHT_Connect(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
+        HHT_Connect_Hard(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
       
         j++;
         Serial.print("!");
@@ -263,9 +269,49 @@ void reset_detect()
         Serial.println("\n按键已长按3秒,正在清空NVS保存的信息.");
         DeleteHHT();
         DeleteWiFi();    //删除保存的wifi信息 
+        Serial.println("开始重启设备.");
         ESP.restart();    //重启复位esp32
         Serial.println("已重启设备.");
     }      
+  }
+}
+
+void serial_detect()
+{
+    if (Serial.available()) {
+    // 读取串口接收到的字符，存储到字符数组中
+    char receivedChars[100];
+    int i = 0;
+    while (Serial.available()) {
+      char c = Serial.read();
+      receivedChars[i] = c;
+      i++;
+    }
+    receivedChars[i] = '\0'; // 在字符数组末尾添加null字符，表示字符串的结束
+
+    // 将字符数组转换为String对象
+    String receivedString = String(receivedChars);
+
+    // 判断接收到的字符串是否等于特定的字符串
+    if (receivedString.equals("Hello")) {
+      Serial.println("Received: Hello");
+    } 
+    else if (receivedString.equals("World")) {
+      Serial.println("Received: World");
+    } 
+
+    else if (receivedString.equals("AT_CLR_pref")) {
+        Serial.println("Received: AT_CLR_pref");
+    Serial.println("开始清空NVS保存的信息.");
+        DeleteHHT();
+        DeleteWiFi();    //删除保存的wifi信息 
+        Serial.println("开始重启设备.");
+        ESP.restart();    //重启复位esp32
+    }
+    
+    else {
+      Serial.println("Received: Unknown");
+    }
   }
 }
 
@@ -285,10 +331,9 @@ void loop() {
   while (1)
   {
     reset_detect();
-    
+    serial_detect();
     Web_SetWifi_loop();
     // HHT_Connect();
-    // delay(3000); // seconds delay
 
     // payload = "domain=telecom&username=ffffff&password=ffffff";
     // Serial.println(payload);
@@ -304,5 +349,6 @@ void loop() {
     // Serial.println(hht_interval.toFloat());
     // delay(hht_interval.toFloat());
     Internal_HHT_Reconnect(Pref_HHT_Interval.c_str());
+        delay(100); // seconds delay
   }
 }

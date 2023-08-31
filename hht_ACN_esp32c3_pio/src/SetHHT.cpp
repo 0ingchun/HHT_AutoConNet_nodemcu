@@ -339,6 +339,10 @@ void HHT_Connect(String s_hht_domain, String s_hht_username, String s_hht_passwo
     // WiFiClient c;
 	HTTPClient http;
 	http.begin(s_hht_followerUrl); //HTTP begin
+  Serial.println("void HHT_Connect(): http try to connect: " + s_hht_followerUrl);
+  // http.begin("http://10.10.16.12/api/portal/v1/login");
+  //http.begin("http://www.bing.com");
+
 	int httpCode = http.GET();
 
 	if (httpCode > 0)
@@ -389,6 +393,88 @@ void HHT_Connect(String s_hht_domain, String s_hht_username, String s_hht_passwo
         *p_login_HHT_Flag = false;
       }
 		}
+	}
+	else
+	{
+		Serial.printf("HTTP Get Error: %s\n", http.errorToString(httpCode).c_str());
+    Serial.println("");
+    *p_login_HHT_Flag = false;
+	}
+    http.end();
+  }
+}
+
+void HHT_Connect_Hard(String s_hht_domain, String s_hht_username, String s_hht_password, String s_hht_followerUrl, bool* p_login_HHT_Flag)
+{
+  if (WiFi.status() == WL_CONNECTED) {
+
+    // WiFiClient c;
+	HTTPClient http;
+	http.begin(s_hht_followerUrl); //HTTP begin
+  Serial.println("void HHT_Connect_Hard(): http try to connect: " + s_hht_followerUrl);
+  // http.begin("http://10.10.16.12/api/portal/v1/login");
+  //http.begin("http://www.bing.com");
+
+	int httpCode = http.GET();
+
+	if (httpCode > 0)
+	{
+		// httpCode will be negative on error
+		Serial.printf("HTTP Get Code: %d\r\n", httpCode);
+
+    Serial.printf("HHT_Connect_Hard: Hardly to Connect!!!");
+
+		// if (httpCode == HTTP_CODE_OK) // 收到正确的内容
+		// {
+      http.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+      http.addHeader("X-Requested-With", "XMLHttpRequest");
+
+      // String payload = "domain=telecom&username=ffffff&password=ffffff";
+      // String payload = "{\"domain\":\"telecom\",\"username\":\"ffffff\",\"password\":\"ffffff\"}";
+      //payload = "{\"domain\":\"telecom\",\"username\":\"ffffff\",\"password\":\"ffffff\"}";
+      payload = "{\"domain\":\"" + s_hht_domain +"\",\"username\":\"" + s_hht_username +"\",\"password\":\"" + s_hht_password + "\"}";
+
+      Serial.println("payload is OK to send:" + payload);
+
+        // delay(50);
+
+      int httpResponseCode = http.POST(payload);
+
+      http.end();
+      ///////////Connect end
+
+      String s_testUrl = "http://www.baidu.com";
+      http.begin(s_testUrl); //HTTP begin
+      Serial.println("void HHT_Connect_Hard(): http try to connect: " + s_testUrl);
+
+      if (httpResponseCode == HTTP_CODE_OK) {
+        String response = http.getString();
+
+        // int count = 0;
+        // while ( ! (response.indexOf("\"reply_code\": 0") != -1 ) )
+        // {
+        //   delay(500);
+        //   count++;
+        //   if(count > 20){//如果10秒内（计数20次）没有连上，就开启Web配网 可适当调整这个时间
+        //     //setHHT_new();
+        //   }
+        //   Serial.print(".");
+        // }
+        
+        if (response.indexOf("\"reply_code\": 0") != -1) {
+          Serial.println("登录成功");
+          *p_login_HHT_Flag = true;
+        }
+        else {
+          Serial.println("登录失败");
+          *p_login_HHT_Flag = false;
+        }
+      }
+      else {
+        Serial.println("HTTP request failed");
+        *p_login_HHT_Flag = false;
+      }
+		// }
 	}
 	else
 	{
