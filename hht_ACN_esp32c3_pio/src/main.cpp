@@ -103,6 +103,13 @@ void Web_SetWifi_loop()
 
 //-----------------------------------HHT-------------------------------------//
 
+void HHT_Connect_Both()
+{
+  HHT_Connect(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
+  delay(500);
+  HHT_Connect_Hard(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
+      
+}
 
 void Web_SetHHT_setup()
 {
@@ -168,7 +175,7 @@ void Web_SetHHT_setup()
 
 Serial.println("-------wdf?------");
 
-login_HHT_Flag = true;
+// login_HHT_Flag = true;
 
     hht_username = Pref_HHT_Username.c_str();
     hht_password = Pref_HHT_Password.c_str();
@@ -180,7 +187,8 @@ login_HHT_Flag = true;
   while (login_HHT_Flag == false)
   {   
 
-      HHT_Connect(Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_Domain.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
+      // HHT_Connect(Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_Domain.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
+    HHT_Connect_Both();
 
       Serial.println("login_HHT_Flag = " + String(login_HHT_Flag));
 
@@ -226,10 +234,11 @@ void Internal_HHT_Reconnect(String s_hht_interval)
       while (login_HHT_Flag == false)
       {   
 
-        HHT_Connect(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
-        delay(500);
-        HHT_Connect_Hard(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
-      
+        // HHT_Connect(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
+        // delay(500);
+        // HHT_Connect_Hard(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
+      HHT_Connect_Both();
+
         j++;
         Serial.print("!");
         delay(1000);

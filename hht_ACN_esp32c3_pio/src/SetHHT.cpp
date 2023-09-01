@@ -446,6 +446,8 @@ void HHT_Connect_Hard(String s_hht_domain, String s_hht_username, String s_hht_p
       String s_testUrl = "http://www.baidu.com";
       http.begin(s_testUrl); //HTTP begin
       Serial.println("void HHT_Connect_Hard(): http try to connect: " + s_testUrl);
+      httpResponseCode  = http.GET();
+      Serial.printf("HTTP Get Code: %d\r\n", httpResponseCode);
 
       if (httpResponseCode == HTTP_CODE_OK) {
         String response = http.getString();
@@ -461,14 +463,16 @@ void HHT_Connect_Hard(String s_hht_domain, String s_hht_username, String s_hht_p
         //   Serial.print(".");
         // }
         
-        if (response.indexOf("\"reply_code\": 0") != -1) {
-          Serial.println("登录成功");
-          *p_login_HHT_Flag = true;
-        }
-        else {
-          Serial.println("登录失败");
-          *p_login_HHT_Flag = false;
-        }
+        // if (response.indexOf("\"reply_code\": 0") != -1) {
+        //   Serial.println("登录成功");
+        //   *p_login_HHT_Flag = true;
+        // }
+        // else {
+        //   Serial.println("登录失败");
+        //   *p_login_HHT_Flag = false;
+        // }
+
+        *p_login_HHT_Flag = true;
       }
       else {
         Serial.println("HTTP request failed");
