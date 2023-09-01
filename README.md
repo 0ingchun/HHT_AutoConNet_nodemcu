@@ -1,5 +1,8 @@
 # HHT_AutoConNet_nodemcu
+
 使用單片機程序自動登錄hht
+
+無需使用服務器，低成本，實現無縫重連，智能&共享，的寬帶優化體驗
 
 
 ## 開發平臺
@@ -70,7 +73,9 @@ hht_ACN_esp32c3_pio 基本本地功能已實現 2023.9.1，api.HHT/ 是詐騙慣
 
 
 
-## 感謝項目 https://github.com/XJTLU-Geek/hht-network 和 https://github.com/kaijianyi/NJUCM_NET 的支持和幫助
+## THANKS
+
+感謝項目 https://github.com/XJTLU-Geek/hht-network 和 https://github.com/kaijianyi/NJUCM_NET 的支持和幫助
 
 - 親情贊助 / 商務大使 /形象代言 ：** 山坤坤 **
 
