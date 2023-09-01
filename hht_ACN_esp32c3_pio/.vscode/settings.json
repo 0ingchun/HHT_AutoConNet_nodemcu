@@ -26,5 +26,6 @@
         "vector": "cpp",
         "string_view": "cpp",
         "initializer_list": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "E:/Document/Code/MyProject/HHT_AutoConNet_nodemcu/hht_ACN_esp32c3_pio/.pio/libdeps/esp32-c3-devkitc-02/Unity"
 }
