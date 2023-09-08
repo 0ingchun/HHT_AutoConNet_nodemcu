@@ -35,7 +35,8 @@ void Web_SetWifi_setup()
   // Serial.begin(115200);
   //delay(10);
   pinMode(LED_BUILTIN, OUTPUT); //板载led灯作为指示
-  pinMode(resetPin, INPUT_PULLUP);      //按键上拉输入模式(默认高电平输入,按下时下拉接到低电平)
+  // pinMode(resetPin, INPUT_PULLUP);      //按键上拉输入模式(默认高电平输入,按下时下拉接到低电平)
+  
   reset_detect();
   //首次使用自动进入配网模式,读取NVS存储空间内的ssid、password和citycode
   Preferences prefs;
@@ -271,17 +272,33 @@ void Internal_HHT_Reconnect(String s_hht_interval)
 }
 //-----------------------------------SYSTEM-------------------------------------//
 
-void reset_detect()
+void reset_detect_old()
 {
   if(!digitalRead(resetPin)){
     delay(2000);
     if(!digitalRead(resetPin)){ //1Kde 下来电阻，10K的拉不动  
-        Serial.println("\n按键已长按3秒,正在清空NVS保存的信息.");
+        Serial.println("\nThe key has been pressed and held for 3 seconds. It is clearing the information saved by NVS.");
         DeleteHHT();
         DeleteWiFi();    //删除保存的wifi信息 
-        Serial.println("开始重启设备.");
+        Serial.println("Start to Reboot.");
         ESP.restart();    //重启复位esp32
-        Serial.println("已重启设备.");
+        Serial.println("RebootED !");
+    }      
+  }
+}
+
+void reset_detect()
+{
+  if(analogRead(resetPin) == 0 || analogRead(resetPin) == 4095 || analogRead(resetPin) <= 600){
+    Serial.println("Wait for resetPIN.");
+    delay(3000);
+if(analogRead(resetPin) == 0 || analogRead(resetPin) == 4095 || analogRead(resetPin) <= 600){ //1Kde 下来电阻，10K的拉不动  
+        Serial.println("\nThe key has been pressed and held for 3 seconds. It is clearing the information saved by NVS.");
+        DeleteHHT();
+        DeleteWiFi();    //删除保存的wifi信息 
+        Serial.println("Start to Reboot.");
+        ESP.restart();    //重启复位esp32
+        Serial.println("RebootED !");
     }      
   }
 }
@@ -331,15 +348,34 @@ void setup() {
 
   Serial.begin(115200);
   delay(10);
+
+  // pinMode(resetPin, INPUT_PULLUP);      //按键上拉输入模式(默认高电平输入,按下时下拉接到低电平)
+  
+  pinMode(resetPin, INPUT);
+
+  reset_detect();
+
+  int_LedStatus();
+  LedStatus_Quench(wifi_led);
+  LedStatus_Quench(hht_led);
+
+  // delay(1000000000);
+
   Web_SetWifi_setup();
   //WiFi_Connect();
+  LedStatus_Light(wifi_led);
+
+  // login_HHT_Flag = 1;
 
   Web_SetHHT_setup();
+  LedStatus_Light(hht_led);
 }
 
 void loop() {
   while (1)
   {
+    LedStatus_Light(wifi_led);
+    LedStatus_Light(hht_led);
     reset_detect();
     serial_detect();
     Web_SetWifi_loop();
@@ -358,7 +394,11 @@ void loop() {
     // delay(3000); // seconds delay
     // Serial.println(hht_interval.toFloat());
     // delay(hht_interval.toFloat());
+
+    delay(200); // seconds delay
+    LedStatus_Quench(hht_led);
+
     Internal_HHT_Reconnect(Pref_HHT_Interval.c_str());
-        delay(100); // seconds delay
+        delay(200); // seconds delay
   }
 }
