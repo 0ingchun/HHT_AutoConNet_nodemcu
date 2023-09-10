@@ -38,6 +38,7 @@ unsigned long previousMillis = 0;
 //const char* ssid = "MERCURY_D268G";
 //const char* password = "pba5ayzk";
 //强制门户Web配网
+const int bootPin = 9;
 const int resetPin = 0;                    //设置重置按键引脚,用于删除WiFi信息
 // bool setWiFi_Flag = false;
 

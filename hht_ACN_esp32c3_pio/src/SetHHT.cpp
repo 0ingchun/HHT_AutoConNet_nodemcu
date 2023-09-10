@@ -15,7 +15,7 @@ String hht_followerUrl = "http://10.10.16.12/api/portal/v1/login";
 String hht_domain = "default";
 String hht_username = "12345678900";
 String hht_password = "123321";
-String hht_interval = "5.00";
+String hht_interval = "6.00";
 
 
 //配网页面代码 
@@ -71,7 +71,7 @@ String hht_page_html = R"(
           <input id="password" type="password" name='password' autocomplete="off" placeholder="HHT密码">
          </div>
          <div class="form-item">
-          <input id="domain" type="text" name='domain' autocomplete="off" placeholder="运营商代码,留空则默认或无法登录">
+          <input id="domain" type="text" name='domain' autocomplete="off" placeholder="运营商代码,留空可能无法登录">
          </div>
          <div class="form-item">
           <input id="interval" type="text" name='interval' autocomplete="off" placeholder="自动重连时间(单位：小时)，建议填写12">
@@ -83,18 +83,27 @@ String hht_page_html = R"(
         </div>
         <div class="form-item">
           <div class="user_text">
+
             <br>
-            <p><h3>如何获取domain：</h3></p>
+            <p><h3>填写【运营商代码】：</h3></p>
               <h5>
-                运营商代码由若干字母组成，请参考下表，填写错误可能导致获取不到数据而无限重启
+                “运营商代码”由若干字母组成，请参考下表，填写错误可能导致获取不到数据而无限重启
                 <br>
                 cmcc（中國移動），unicom（中國聯通），telecom（中國電信），default（默認）
                 <br>
-                运营商代码示例：若干您是移动用户，请填写 cmcc
+                运营商代码示例：若您是“中国移动”用户，请填写 cmcc
+              </h5>
+            </p>
+
+            <br>
+            <p><h3>填写【自动重连时间】：</h3></p>
+              <h5>
+                “自动重连时间”为阿拉伯数字（单位：小时），填写后设备经过该时间自动请求重新登录hht
                 <br>
                 小时制自动重连示例：每12小时自动重连HHT，请填写 12
               </h5>
             </p>
+
           </div>
          </div>
         
@@ -138,45 +147,59 @@ void hht_handleRootPost() {//Post回调函数
 
 
     if (hht_server.hasArg("username")) {//判断是否有账号参数
-    Serial.print("got username:");
-    strcpy(sta_hht_username, hht_server.arg("username").c_str());//将账号参数拷贝到sta_ssid中
-    Serial.println(sta_hht_username);
-    } else {//没有参数
-    Serial.println("error, not found username");
-    hht_server.send(200, "text/html", "<meta charset='UTF-8'>提示：请输入hht用户名");//返回错误页面
-    return;
+      Serial.print("got username:");
+      strcpy(sta_hht_username, hht_server.arg("username").c_str());//将账号参数拷贝到sta_ssid中
+      Serial.println(sta_hht_username);
+    } 
+    else {//没有参数
+      Serial.println("error, not found username");
+      hht_server.send(200, "text/html", "<meta charset='UTF-8'>错误：请输入hht用户名");//返回错误页面
+      return;
     }
 
     //密码与账号同理
     if (hht_server.hasArg("password")) {
-    Serial.print("got password:");
-    strcpy(sta_hht_password, hht_server.arg("password").c_str());
-    Serial.println(sta_hht_password);
-    } else {
-    Serial.println("error, not found password");
-    hht_server.send(200, "text/html", "<meta charset='UTF-8'>提示：请输入hht密码");
-    return;
+      Serial.print("got password:");
+      strcpy(sta_hht_password, hht_server.arg("password").c_str());
+      Serial.println(sta_hht_password);
+    } 
+    else {
+      Serial.println("error, not found password");
+      hht_server.send(200, "text/html", "<meta charset='UTF-8'>错误：请输入hht密码");
+      return;
     }
 
 
     if (hht_server.hasArg("domain")) {
-    Serial.print("got domain:");
-    strcpy(sta_hht_domain, hht_server.arg("domain").c_str());
-    Serial.println(sta_hht_domain);
-    } else {
-    Serial.println("error, not found domain");
-    hht_server.send(200, "text/html", "<meta charset='UTF-8'>提示：请输入运营商代码");
-    return;
+      Serial.print("got domain:");
+      strcpy(sta_hht_domain, hht_server.arg("domain").c_str());
+      Serial.println(sta_hht_domain);
+    }  
+    else if (sta_hht_domain != "cmcc" && sta_hht_domain != "unicom" && sta_hht_domain != "telecom") {
+      Serial.println("error, not found domain");
+      hht_server.send(200, "text/html", "<meta charset='UTF-8'>错误：请参考页末提示输入运营商代码");
+      return;
+    } 
+    else {
+      Serial.println("error, not found domain");
+      hht_server.send(200, "text/html", "<meta charset='UTF-8'>错误：运营商代码为空");
+      return;
     }
 
     if (hht_server.hasArg("interval")) {
-    Serial.print("got domain:");
-    strcpy(sta_hht_interval, hht_server.arg("interval").c_str());
-    Serial.println(sta_hht_interval);
-    } else {
-    Serial.println("error, not found interval");
-    hht_server.send(200, "text/html", "<meta charset='UTF-8'>提示：请输入自动重连时间");
-    return;
+      Serial.print("got domain:");
+      strcpy(sta_hht_interval, hht_server.arg("interval").c_str());
+      Serial.println(sta_hht_interval);
+    } 
+    else if ( String(sta_hht_interval).toInt() >= 24) {
+      Serial.println("error, interval >= 24hours");
+      hht_server.send(200, "text/html", "<meta charset='UTF-8'>错误：自动重连时间(hour)不得大于24");
+      return;
+    } 
+    else {
+      Serial.println("error, not found interval");
+      hht_server.send(200, "text/html", "<meta charset='UTF-8'>错误：请输入自动重连时间");
+      return;
     }
 
 

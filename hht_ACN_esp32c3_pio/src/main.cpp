@@ -272,6 +272,7 @@ void Internal_HHT_Reconnect(String s_hht_interval)
 }
 //-----------------------------------SYSTEM-------------------------------------//
 
+/*
 void reset_detect_old()
 {
   if(!digitalRead(resetPin)){
@@ -286,20 +287,23 @@ void reset_detect_old()
     }      
   }
 }
+*/
 
 void reset_detect()
 {
-  if(analogRead(resetPin) == 0 || analogRead(resetPin) == 4095 || analogRead(resetPin) <= 600){
+  if(!digitalRead(bootPin) || analogRead(resetPin) == 0 || analogRead(resetPin) == 4095 || analogRead(resetPin) <= 600){
     Serial.println("Wait for resetPIN.");
     delay(3000);
-if(analogRead(resetPin) == 0 || analogRead(resetPin) == 4095 || analogRead(resetPin) <= 600){ //1Kde 下来电阻，10K的拉不动  
-        Serial.println("\nThe key has been pressed and held for 3 seconds. It is clearing the information saved by NVS.");
-        DeleteHHT();
-        DeleteWiFi();    //删除保存的wifi信息 
-        Serial.println("Start to Reboot.");
-        ESP.restart();    //重启复位esp32
-        Serial.println("RebootED !");
-    }      
+    
+    if(!digitalRead(bootPin) || analogRead(resetPin) == 0 || analogRead(resetPin) == 4095 || analogRead(resetPin) <= 600){ //1Kde 下来电阻，10K的拉不动  
+      Serial.println("\nThe key has been pressed and held for 3 seconds. It is clearing the information saved by NVS.");
+      DeleteHHT();
+      DeleteWiFi();    //删除保存的wifi信息 
+      Serial.println("Start to Reboot.");
+      ESP.restart();    //重启复位esp32
+      Serial.println("RebootED !");
+    }
+
   }
 }
 
@@ -347,9 +351,9 @@ void serial_detect()
 void setup() {
 
   Serial.begin(115200);
-  delay(10);
+  delay(500);
 
-  // pinMode(resetPin, INPUT_PULLUP);      //按键上拉输入模式(默认高电平输入,按下时下拉接到低电平)
+  pinMode(bootPin, INPUT_PULLUP);      //按键上拉输入模式(默认高电平输入,按下时下拉接到低电平)
   
   pinMode(resetPin, INPUT);
 
