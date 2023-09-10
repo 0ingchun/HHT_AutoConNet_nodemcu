@@ -143,6 +143,17 @@ void Web_SetHHT_setup()
     Serial.println("Pref_HHT_Username = nano");
     setHHT();
   }
+  else if (Pref_HHT_Domain != "cmcc" && Pref_HHT_Domain != "unicom" && Pref_HHT_Domain != "telecom") {
+    Pref_HHT_Domain = "default";
+    Serial.println("error, interval >= 24 hours");
+    setHHT();
+  } 
+  else if (String(Pref_HHT_Interval).toInt() >= 24)
+  {
+    Pref_HHT_Interval = 23;
+    Serial.println("Pref_HHT_Username = nano");
+    setHHT();
+  }
   /*
   else{
 
@@ -291,11 +302,11 @@ void reset_detect_old()
 
 void reset_detect()
 {
-  if(!digitalRead(bootPin) || analogRead(resetPin) == 0 || analogRead(resetPin) == 4095 || analogRead(resetPin) <= 600){
+  if( !digitalRead(bootPin) /* || analogRead(resetPin) == 0 || analogRead(resetPin) == 4095 || analogRead(resetPin) <= 600 */ ) {
     Serial.println("Wait for resetPIN.");
     delay(3000);
     
-    if(!digitalRead(bootPin) || analogRead(resetPin) == 0 || analogRead(resetPin) == 4095 || analogRead(resetPin) <= 600){ //1Kde 下来电阻，10K的拉不动  
+    if(!digitalRead(bootPin) /* || analogRead(resetPin) == 0 || analogRead(resetPin) == 4095 || analogRead(resetPin) <= 600 */ ) { //1Kde 下来电阻，10K的拉不动  
       Serial.println("\nThe key has been pressed and held for 3 seconds. It is clearing the information saved by NVS.");
       DeleteHHT();
       DeleteWiFi();    //删除保存的wifi信息 
@@ -354,8 +365,7 @@ void setup() {
   delay(500);
 
   pinMode(bootPin, INPUT_PULLUP);      //按键上拉输入模式(默认高电平输入,按下时下拉接到低电平)
-  
-  pinMode(resetPin, INPUT);
+  // pinMode(resetPin, INPUT);
 
   reset_detect();
 

@@ -1,6 +1,6 @@
 #include "SetWifi.h"
 
-const char* AP_NAME = "ESP32_WiFi_AP";  //Web配网模式下的AP-wifi名字
+const char* AP_NAME = "ANC_WiFi_AP_";  //Web配网模式下的AP-wifi名字
 String PrefSSID, PrefPassword, cityCode; 
 
 //暂时存储wifi账号密码
@@ -94,12 +94,22 @@ void handleRoot() {//访问主页回调函数
   server.send(200, "text/html", page_html);
 }
 void initSoftAP(void){//初始化AP模式
+//把mac拼接到ap_name后
+  uint8_t mac[6];
+  WiFi.macAddress(mac);
+  char macStr[18];
+  sprintf(macStr, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  Serial.print("MAC Address: ");
+  Serial.println(macStr);
+  char wifiName[32];
+  sprintf(wifiName, "%s%s", AP_NAME, macStr);
+
   WiFi.mode(WIFI_AP);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
   Serial.println(WiFi.softAPIP());
 //    Serial.print("本地IP： ");
 //  Serial.println(WiFi.localIP());
-  if(WiFi.softAP(AP_NAME)){
+  if(WiFi.softAP(wifiName)){
     Serial.println("ESP32 SoftAP for setWiFi is right");
   }
 }

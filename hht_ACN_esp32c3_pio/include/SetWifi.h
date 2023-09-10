@@ -5,6 +5,7 @@
 
 // #include <Arduino.h>
 
+#include <esp_efuse.h>
 #include <WiFi.h>
 #include <esp_wifi.h>
 #include <DNSServer.h>

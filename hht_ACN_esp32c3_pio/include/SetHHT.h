@@ -7,6 +7,7 @@
 
 #include <WiFi.h>
 #include <esp_wifi.h>
+#include <esp_efuse.h>
 
 #include <DNSServer.h>
 #include <WebServer.h>

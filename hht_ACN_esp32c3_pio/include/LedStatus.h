@@ -2,8 +2,8 @@
 
 #include <Arduino.h>
 
-char wifi_led = 12;
-char hht_led = 13;
+const int wifi_led = 12;
+const int hht_led = 13;
 
 void int_LedStatus()
 {

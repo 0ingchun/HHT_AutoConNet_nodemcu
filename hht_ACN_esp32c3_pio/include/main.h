@@ -14,6 +14,8 @@
 #include "LedStatus.h"
 #include "TimeCharge.h"
 
+#include <esp_efuse.h>
+
 const char* wifi_ssid = "keke";
 const char* wifi_password = "qp10al29zm38keke";
 

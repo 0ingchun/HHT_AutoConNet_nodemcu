@@ -1,6 +1,6 @@
 #include "SetHHT.h"
 
-const char* hht_AP_NAME = "ESP32_HHT_AP";//Web配网模式下的AP-hht名字
+const char* hht_AP_NAME = "ANC_HHT_AP_";//Web配网模式下的AP-hht名字
 String Pref_HHT_Username, Pref_HHT_Password, Pref_HHT_Domain, Pref_HHT_Interval ,Pref_HHT_FollowerUrl;
 
 //暂时存储hht账号密码
@@ -65,7 +65,7 @@ String hht_page_html = R"(
       <h2>H H T 参 数 配 置</h2>
       <form style='text-align: center;padding-top: 20px' name='input' action='/' method='POST'>  
          <div class="form-item">
-          <input id="username" type="text" name='username' autocomplete="off" placeholder="HHT名称">
+          <input id="username" type="text" name='username' autocomplete="off" placeholder="HHT用户名">
          </div>
          <div class="form-item">
           <input id="password" type="password" name='password' autocomplete="off" placeholder="HHT密码">
@@ -124,12 +124,22 @@ void hht_handleRoot() {//访问主页回调函数
 }
 
 void hht_initSoftAP(void) {//初始化AP模式
+//把mac拼接到ap_name后
+  uint8_t mac[6];
+  WiFi.macAddress(mac);
+  char macStr[18];
+  sprintf(macStr, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  Serial.print("MAC Address: ");
+  Serial.println(macStr);
+  char wifiName[32];
+  sprintf(wifiName, "%s%s", hht_AP_NAME, macStr);
+
     WiFi.mode(WIFI_AP);
     WiFi.softAPConfig(hht_apIP, hht_apIP, IPAddress(255, 255, 255, 0));
     Serial.println(WiFi.softAPIP());
     //  Serial.print("本地IP： ");
     //  Serial.println(WiFi.localIP());
-    if(WiFi.softAP(hht_AP_NAME)){
+    if(WiFi.softAP(wifiName)){
         Serial.println("ESP32 SoftAP for HHTset is right");
     }
 }
@@ -192,7 +202,7 @@ void hht_handleRootPost() {//Post回调函数
       Serial.println(sta_hht_interval);
     } 
     else if ( String(sta_hht_interval).toInt() >= 24) {
-      Serial.println("error, interval >= 24hours");
+      Serial.println("error, interval >= 24 hours");
       hht_server.send(200, "text/html", "<meta charset='UTF-8'>错误：自动重连时间(hour)不得大于24");
       return;
     } 
