@@ -523,6 +523,29 @@ void HHT_Connect_Hard(String s_hht_domain, String s_hht_username, String s_hht_p
   }
 }
 
+void HHT_Connect_ping(bool* p_login_HHT_Flag)
+{
+  if (WiFi.status() == WL_CONNECTED) {
+
+    // WiFiClient c;
+	HTTPClient http;
+      String s_testUrl = "http://www.baidu.com";
+      http.begin(s_testUrl); //HTTP begin
+      Serial.println("void HHT_Connect_Hard(): http try to connect: " + s_testUrl);
+      int httpResponseCode = http.GET();
+      Serial.printf("HTTP Get Code: %d\r\n", httpResponseCode);
+
+      if (httpResponseCode == HTTP_CODE_OK) {
+        String response = http.getString();
+        *p_login_HHT_Flag = true;
+      }
+      else {
+        Serial.println("HTTP request failed");
+        *p_login_HHT_Flag = false;
+      }
+  }
+}
+
 
 // bool setHHT_Flag_new = false;
 // void setHHT_new()

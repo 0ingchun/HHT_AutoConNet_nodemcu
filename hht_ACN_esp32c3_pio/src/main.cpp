@@ -224,6 +224,14 @@ Serial.println("-------wdf?------");
   configTime(8 * 3600, 0, NTP1, NTP2, NTP3);
 }
 
+void Drop_Ping_REconnect()
+{
+  HHT_Connect_ping(&login_HHT_Flag);
+  if (!login_HHT_Flag)
+  {
+    HHT_Connect_Both();
+  }
+}
 
 void Internal_HHT_Reconnect(String s_hht_interval)
 {
@@ -412,6 +420,7 @@ void loop() {
     delay(200); // seconds delay
     LedStatus_Quench(hht_led);
 
+    Drop_Ping_REconnect();
     Internal_HHT_Reconnect(Pref_HHT_Interval.c_str());
         delay(200); // seconds delay
   }
