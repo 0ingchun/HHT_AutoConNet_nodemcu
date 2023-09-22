@@ -529,7 +529,24 @@ void HHT_Connect_ping(bool* p_login_HHT_Flag)
 
     // WiFiClient c;
 	HTTPClient http;
-      String s_testUrl = "http://www.baidu.com";
+
+String s_testUrl = "http://www.baidu.com";
+randomSeed(millis());
+char url_switch_flag = random(0, 2);
+      if (url_switch_flag = 0)
+      {
+        s_testUrl = "http://www.baidu.com";
+      }
+      else if (url_switch_flag = 1)
+      {
+        s_testUrl = "http://www.bing.com";
+      }
+      else if (url_switch_flag = 2)
+      {
+        s_testUrl = "http://www.bilibili.com";
+      }
+
+      // String s_testUrl = "http://www.baidu.com";
       http.begin(s_testUrl); //HTTP begin
       Serial.println("void HHT_Connect_Hard(): http try to connect: " + s_testUrl);
       int httpResponseCode = http.GET();

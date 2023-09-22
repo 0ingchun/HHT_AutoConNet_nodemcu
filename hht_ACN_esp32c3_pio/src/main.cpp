@@ -417,11 +417,17 @@ void loop() {
     // Serial.println(hht_interval.toFloat());
     // delay(hht_interval.toFloat());
 
-    delay(500); // seconds delay
+        delay(100); // seconds delay
+        randomSeed(millis());
+        delay(random(0, 400));
+
     LedStatus_Quench(hht_led);
 
     Drop_Ping_REconnect();
     Internal_HHT_Reconnect(Pref_HHT_Interval.c_str());
-        delay(500); // seconds delay
+
+        delay(100); // seconds delay
+        randomSeed(millis());
+        delay(random(0, 400));
   }
 }
