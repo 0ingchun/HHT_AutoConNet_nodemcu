@@ -113,6 +113,25 @@ String hht_page_html = R"(
 </html>
 )";
 
+String generate_url(void){
+  randomSeed(millis());
+  char url_switch_flag = random(0, 2);
+  String s_testUrl = "http://www.baidu.com";
+      if (url_switch_flag = 0)
+      {
+        s_testUrl = "http://www.baidu.com";
+      }
+      else if (url_switch_flag = 1)
+      {
+        s_testUrl = "http://www.bing.com";
+      }
+      else if (url_switch_flag = 2)
+      {
+        s_testUrl = "http://www.bilibili.com";
+      }
+  return s_testUrl;
+}
+
 const byte hht_DNS_PORT = 53;//DNS端口号
 IPAddress hht_apIP(192, 168, 4, 1);//esp32-AP-IP地址
 DNSServer hht_dnsServer;//创建dnsServer实例
@@ -476,7 +495,8 @@ void HHT_Connect_Hard(String s_hht_domain, String s_hht_username, String s_hht_p
       http.end();
       ///////////Connect end
 
-      String s_testUrl = "http://www.baidu.com";
+      String s_testUrl = generate_url();
+
       http.begin(s_testUrl); //HTTP begin
       Serial.println("void HHT_Connect_Hard(): http try to connect: " + s_testUrl);
       httpResponseCode  = http.GET();
@@ -530,21 +550,7 @@ void HHT_Connect_ping(bool* p_login_HHT_Flag)
     // WiFiClient c;
 	HTTPClient http;
 
-String s_testUrl = "http://www.baidu.com";
-randomSeed(millis());
-char url_switch_flag = random(0, 2);
-      if (url_switch_flag = 0)
-      {
-        s_testUrl = "http://www.baidu.com";
-      }
-      else if (url_switch_flag = 1)
-      {
-        s_testUrl = "http://www.bing.com";
-      }
-      else if (url_switch_flag = 2)
-      {
-        s_testUrl = "http://www.bilibili.com";
-      }
+String s_testUrl = generate_url();
 
       // String s_testUrl = "http://www.baidu.com";
       http.begin(s_testUrl); //HTTP begin
