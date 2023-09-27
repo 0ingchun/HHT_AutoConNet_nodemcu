@@ -114,21 +114,21 @@ String hht_page_html = R"(
 )";
 
 String generate_url(void){
-  randomSeed(millis());
-  char url_switch_flag = random(0, 2);
+  // randomSeed(millis());
+  // char url_switch_flag = random(0, 1);
   String s_testUrl = "http://www.baidu.com";
-      if (url_switch_flag = 0)
-      {
-        s_testUrl = "http://www.baidu.com";
-      }
-      else if (url_switch_flag = 1)
-      {
-        s_testUrl = "http://www.bing.com";
-      }
-      else if (url_switch_flag = 2)
-      {
-        s_testUrl = "http://www.bilibili.com";
-      }
+      // if (url_switch_flag = 0)
+      // {
+      //   s_testUrl = "http://www.baidu.com";
+      // }
+      // else if (url_switch_flag = 1)
+      // {
+      //   s_testUrl = "http://www.bilibili.com";
+      // }
+      // else if (url_switch_flag = 2)
+      // {
+      //   s_testUrl = "http://www.bilibili.com";
+      // }
   return s_testUrl;
 }
 
@@ -216,7 +216,7 @@ void hht_handleRootPost() {//Post回调函数
     }
 
     if (hht_server.hasArg("interval")) {
-      Serial.print("got domain:");
+      Serial.print("got interval:");
       strcpy(sta_hht_interval, hht_server.arg("interval").c_str());
       Serial.println(sta_hht_interval);
     } 
