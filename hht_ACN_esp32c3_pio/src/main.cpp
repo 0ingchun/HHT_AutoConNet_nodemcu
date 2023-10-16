@@ -1,3 +1,19 @@
+#include <Arduino.h>
+#include <Preferences.h>
+#include <WiFi.h>
+#include <esp_wifi.h>
+// #include <ESP8266WiFi.h>
+// #include <WiFiClient.h>
+#include "HTTPClient.h"
+
+// #include "gpioPos.h"
+#include "SetWifi.h"
+#include "SetHHT.h"
+#include "LedStatus.h"
+#include "TimeCharge.h"
+
+#include <esp_efuse.h>
+
 #include "main.h"
 
 /*
@@ -74,6 +90,8 @@ void Web_SetWifi_setup()
     {
       setWiFi();
     }
+    
+    LedStatus_Switch(wifi_led);
      digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); //板载led灯闪烁
   }
   Serial.printf("SSID:%s\r\n", WiFi.SSID().c_str());
@@ -213,6 +231,8 @@ Serial.println("-------wdf?------");
       Serial.println("HHT Login Failed! because Timeout 。");
       setHHT();
     }
+
+    LedStatus_Switch(hht_led);
      digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); //板载led灯闪烁
   }
 
@@ -229,7 +249,37 @@ void Drop_Ping_REconnect()
   HHT_Connect_ping(&login_HHT_Flag);
   if (!login_HHT_Flag)
   {
+    Serial.println("void Drop_Ping_REconnect(): WWW Ping Failed! HHT Perhaps Dropped!");
     HHT_Connect_Both();
+  }
+}
+
+void Drop_Wifi_REconnect()
+{
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.println("void Drop_Wifi_REconnect(): Wifi Connection Perhaps Dropped!");
+
+    WiFi.disconnect();
+    Serial.println("已断开WiFi连接！");
+      
+      byte i = 0;
+      while (WiFi.status() != WL_CONNECTED)
+      {   
+        i++;
+        Serial.print('.');
+        delay(500);
+
+        if (i > 20)
+        {
+          Serial.println("Start to Reboot.");
+          ESP.restart();    //重启复位esp32
+          Serial.println("RebootED !");
+        }
+
+        LedStatus_Switch(wifi_led);
+        //  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); //板载led灯闪烁
+      }
   }
 }
 
@@ -310,19 +360,33 @@ void reset_detect_old()
 
 void reset_detect()
 {
-  if( !digitalRead(bootPin) /* || analogRead(resetPin) == 0 || analogRead(resetPin) == 4095 || analogRead(resetPin) <= 600 */ ) {
+  if( !digitalRead(bootPin) /* || analogRead(resetPin) == 0 || analogRead(resetPin) == 4095 || analogRead(resetPin) <= 600 */ ) 
+  {
     Serial.println("Wait for resetPIN.");
-    delay(3000);
     
-    if(!digitalRead(bootPin) /* || analogRead(resetPin) == 0 || analogRead(resetPin) == 4095 || analogRead(resetPin) <= 600 */ ) { //1Kde 下来电阻，10K的拉不动  
-      Serial.println("\nThe key has been pressed and held for 3 seconds. It is clearing the information saved by NVS.");
-      DeleteHHT();
-      DeleteWiFi();    //删除保存的wifi信息 
-      Serial.println("Start to Reboot.");
-      ESP.restart();    //重启复位esp32
-      Serial.println("RebootED !");
+    //延时防抖并闪灯
+    LedStatus_Switch(wifi_led);
+    delay(750);
+    LedStatus_Switch(wifi_led);
+    delay(750);
+    if(!digitalRead(bootPin) /* || analogRead(resetPin) == 0 || analogRead(resetPin) == 4095 || analogRead(resetPin) <= 600 */ ) 
+    { //1Kde 下来电阻，10K的拉不动  
+      LedStatus_Switch(hht_led);
+      delay(750);
+      LedStatus_Switch(hht_led);
+      delay(750);
+    // delay(3000);
+    
+      if(!digitalRead(bootPin) /* || analogRead(resetPin) == 0 || analogRead(resetPin) == 4095 || analogRead(resetPin) <= 600 */ ) 
+      { //1Kde 下来电阻，10K的拉不动  
+        Serial.println("\nThe key has been pressed and held for 3 seconds. It is clearing the information saved by NVS.");
+        DeleteHHT();      //删除保存的hht信息
+        DeleteWiFi();    //删除保存的wifi信息 
+        Serial.println("Start to Reboot.");
+        ESP.restart();    //重启复位esp32
+        Serial.println("RebootED !");
+      }
     }
-
   }
 }
 
@@ -369,19 +433,23 @@ void serial_detect()
 
 void setup() {
 
+  int_LedStatus();
+  LedStatus_Light(wifi_led);
+  LedStatus_Light(hht_led);
+
   Serial.begin(115200);
   delay(500);
 
-  pinMode(bootPin, INPUT_PULLUP);      //按键上拉输入模式(默认高电平输入,按下时下拉接到低电平)
-  // pinMode(resetPin, INPUT);
+  // delay(1000000000);
 
-  reset_detect();
-
-  int_LedStatus();
   LedStatus_Quench(wifi_led);
   LedStatus_Quench(hht_led);
 
-  // delay(1000000000);
+  pinMode(bootPin, INPUT_PULLUP);      //按键上拉输入模式(默认高电平输入,按下时下拉接到低电平)
+  // pinMode(resetPin, INPUT);
+  reset_detect();
+
+  //gpio初始化完成，切入正题
 
   Web_SetWifi_setup();
   //WiFi_Connect();
@@ -396,18 +464,8 @@ void setup() {
 void loop() {
   while (1)
   {
-    LedStatus_Light(wifi_led);
-    LedStatus_Light(hht_led);
-    reset_detect();
-    serial_detect();
-    Web_SetWifi_loop();
-    // HHT_Connect();
 
-    // payload = "domain=telecom&username=ffffff&password=ffffff";
-    // Serial.println(payload);
-    
-    //payload = "{\"domain\":\"" + hht_domain +"\",\"username\":\"" + hht_username +"\",\"password\":\"" + hht_password + "\"}";
-    Serial.println(payload);
+    // serial_detect();
 
     //setHHT_new();
 
@@ -417,17 +475,38 @@ void loop() {
     // Serial.println(hht_interval.toFloat());
     // delay(hht_interval.toFloat());
 
-        delay(100); // seconds delay
-        randomSeed(millis());
-        delay(random(0, 400));
+//WiFi状态检测
+  reset_detect();
+  LedStatus_Light(wifi_led);
 
-    LedStatus_Quench(hht_led);
+    Drop_Wifi_REconnect();
+    Web_SetWifi_loop();
+    // HHT_Connect();
+
+    // payload = "domain=telecom&username=ffffff&password=ffffff";
+    // Serial.println(payload);
+    
+    //payload = "{\"domain\":\"" + hht_domain +"\",\"username\":\"" + hht_username +"\",\"password\":\"" + hht_password + "\"}";
+    Serial.println(payload);
+
+  delay(100); // seconds delay
+  randomSeed(millis());
+  delay(random(0, 400));
+  LedStatus_Quench(hht_led);
+
+
+//HHT状态检测
+  reset_detect();
+  LedStatus_Light(hht_led);
 
     Drop_Ping_REconnect();
     Internal_HHT_Reconnect(Pref_HHT_Interval.c_str());
 
-        delay(100); // seconds delay
-        randomSeed(millis());
-        delay(random(0, 400));
+  delay(100); // seconds delay
+  randomSeed(millis());
+  delay(random(0, 400));
+  LedStatus_Quench(hht_led);
+
+
   }
 }

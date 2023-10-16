@@ -1,6 +1,20 @@
+#include <Arduino.h>
+
+#include <esp_efuse.h>
+#include <WiFi.h>
+#include <esp_wifi.h>
+#include <DNSServer.h>
+#include <WebServer.h>
+#include <Preferences.h>
+
+#include "LedStatus.h"
+
 #include "SetWifi.h"
 
-const char* AP_NAME = "ANC_WiFi_AP_";  //Web配网模式下的AP-wifi名字
+#include "SetWiFi_html.h"
+
+
+const char* AP_NAME = "QwQ WiFi _";  //Web配网模式下的AP-wifi名字
 String PrefSSID, PrefPassword, cityCode; 
 
 //暂时存储wifi账号密码
@@ -8,91 +22,24 @@ char sta_ssid[32] = {0};
 char sta_password[64] = {0};
 char sta_citycode[32] = {0};
 
-//配网页面代码 
-String page_html = R"(
-<!DOCTYPE html>
-<html lang='en'>
-  <head>
-    <meta charset='UTF-8'>
-   
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
-    <title>ESP32配置WIFI页面</title>
-    <style type="text/css">
-      * { margin: 0; padding: 0; }
-       html { height: 100%; }
-       h2 {text-align: center;color: #fff;line-height: 2.2;}
-       body { height: 100%; background-color: #1F6F4A; 50% 50% no-repeat; background-size: cover;}
-       .dowebok { position: absolute; left: 50%; top: 30%; width: 380px; height: 500px; margin: -200px 0 0 -200px; border: 3px solid #fff; border-radius: 10px; overflow: hidden;}
-       
-       .form-item { position: relative; width: 360px; margin: 0 auto; padding-bottom: 20px;}
-       .form-item input { width: 288px; height: 48px; padding-left: 10px; border: 1px solid #fff; border-radius: 25px; font-size: 18px; color: #fff; background-color: transparent; outline: none;}
-       .send_button { width: 360px; height: 50px; border: 0; border-radius: 25px; font-size: 18px; color: #1f6f4a; outline: none; cursor: pointer; background-color: #fff; }
-       
-       .tip { display: none; position: absolute; left: 20px; top: 52px; font-size: 14px; color: #f50; }
-       .reg-bar { width: 360px; margin: 20px auto 0; font-size: 14px; overflow: hidden;}
-       .reg-bar a { color: #fff; text-decoration: none; }
-       .reg-bar a:hover { text-decoration: underline; }
-       .reg-bar .reg { float: left; }
-       .reg-bar .forget { float: right; }
-       .dowebok ::-webkit-input-placeholder { font-size: 18px; line-height: 1.4; color: #fff;}
-       .dowebok :-moz-placeholder { font-size: 18px; line-height: 1.4; color: #fff;}
-       .dowebok ::-moz-placeholder { font-size: 18px; line-height: 1.4; color: #fff;}
-       .dowebok :-ms-input-placeholder { font-size: 18px; line-height: 1.4; color: #fff;}
-        
-       @media screen and (max-width: 500px) {
-       * { box-sizing: border-box; }
-       .dowebok { position: static; width: auto; height: auto; margin: 0 30px; border: 0; border-radius: 0; }
-       .logo { margin: 50px auto; }
-       .form-item { width: auto; }
-       .form-item input, .form-item button, .reg-bar { width: 100%; }
-       }
-       
-    </style>
-  </head>
-  
-  <body>
-    <div class="dowebok">
-      <h2>W i F i 参 数 配 置</h2>
-      <form style='text-align: center;padding-top: 20px' name='input' action='/' method='POST'>  
-         <div class="form-item">
-          <input id="username" type="text" name='ssid' autocomplete="off" placeholder="WiFi名称">
-         </div>
-         <div class="form-item">
-          <input id="password" type="password" name='password' autocomplete="off" placeholder="WiFi密码">
-         </div>
-         <div class="form-item">
-          <input id="citycode" type="citycode" name='citycode' autocomplete="off" placeholder="城市代码,留空则自动定位获取">
-         </div>
-         <div class="form-item">
-           <div id="">
-            <input id="send_button" type='submit' value='保存并连接'>
-           </div>
-        </div>
-        <div class="form-item">
-          <div class="user_text">
-            <br>
-            <p><h3>如何获取cityCode：</h3></p>
-              <h5>
-                1、城市代码由9位阿拉伯数字组成，超过位数可能会导致获取不到数据而无限重启
-              </h5>
-            </p>
-          </div>
-         </div>
-        
-      </form> 
-     </div>
-  </body>
-</html>
-)";
 
 const byte DNS_PORT = 53;//DNS端口号
 IPAddress apIP(192, 168, 4, 1);//esp32-AP-IP地址
 DNSServer dnsServer;//创建dnsServer实例
 WebServer server(80);//创建WebServer
 
+
+unsigned long lastGetTime_SetWiFi = 0;
+
 void handleRoot() {//访问主页回调函数
+  lastGetTime_SetWiFi = millis();  // 更新最后连接时间
+  LedStatus_Light(wifi_led);
+  Serial.print("lastGetTime_SetWiFi: ");
+  Serial.println(lastGetTime_SetWiFi);
+
   server.send(200, "text/html", page_html);
 }
+
 void initSoftAP(void){//初始化AP模式
 //把mac拼接到ap_name后
   uint8_t mac[6];
@@ -121,7 +68,15 @@ void initDNS(void){//初始化DNS服务器
   else Serial.println("start dnsserver failed.");
 }
 
+unsigned long lastPostTime_SetWiFi = 0;
+
 void handleRootPost() {//Post回调函数
+  Serial.println("into void handleRootPost()");
+  lastPostTime_SetWiFi = millis();
+  LedStatus_Light(wifi_led);
+  Serial.println("lastPostTime_SetWiFi: ");
+  Serial.println(lastPostTime_SetWiFi);
+
 String wifiid="",wifipass="",cityid="";
   Serial.println("handleRootPost");
   if (server.hasArg("ssid")) {//判断是否有账号参数
@@ -145,15 +100,15 @@ String wifiid="",wifipass="",cityid="";
   }
 
 
-  if (server.hasArg("citycode")) {
-    Serial.print("got citycode:");
-    strcpy(sta_citycode, server.arg("citycode").c_str());
-    Serial.println(sta_citycode);
-  } else {
-    Serial.println("error, not found citycode");
-    server.send(200, "text/html", "<meta charset='UTF-8'>提示：请输入城市代码");
-    return;
-  }
+  // if (server.hasArg("citycode")) {
+  //   Serial.print("got citycode:");
+  //   strcpy(sta_citycode, server.arg("citycode").c_str());
+  //   Serial.println(sta_citycode);
+  // } else {
+  //   Serial.println("error, not found citycode");
+  //   server.send(200, "text/html", "<meta charset='UTF-8'>提示：请输入城市代码");
+  //   return;
+  // }
     Preferences prefs; 
   prefs.begin("wifi");
   wifiid=sta_ssid;wifipass=sta_password;cityid=sta_citycode;
@@ -224,6 +179,8 @@ Preferences prefs;
   }
 }
 
+unsigned long lastSetRunTime_SetWiFi = 0;
+
 bool setWiFi_Flag = false;
 void setWiFi()
 {
@@ -234,6 +191,7 @@ void setWiFi()
   initDNS();
   // Serial.println(PrefSSID+5);
   Serial.println("into void setWiFi()");
+  lastGetTime_SetWiFi = millis();
 
   while (setWiFi_Flag == false)
   {
@@ -241,6 +199,24 @@ void setWiFi()
     // Serial.println(PrefSSID+6);
     dnsServer.processNextRequest();
     // Serial.println(PrefSSID+7);
+
+    //配置页面未超时自动重启，防止连接不上导致卡在配网页面
+    lastSetRunTime_SetWiFi = millis();
+    Serial.print("lastConnectionTime_SetWiFi-interval : ");
+    Serial.println(lastSetRunTime_SetWiFi - lastPostTime_SetWiFi);
+    LedStatus_Switch(wifi_led);
+    if(lastSetRunTime_SetWiFi - lastPostTime_SetWiFi > (1000*60)*3)  //1000ms = 1s 一万毫秒等于一秒
+    {
+      Serial.println("Start to Reboot.");
+      ESP.restart();    //重启复位esp32
+      Serial.println("RebootED !");
+    }
+
+    // while(1)
+    // {
+    //   Serial.println("wuhuwuhu------");
+    // }
+
     if (WiFi.status() == WL_CONNECTED)
     {
       // Serial.println(PrefSSID+8);
@@ -264,5 +240,5 @@ void DeleteWiFi(){
   Serial.println(prefs.freeEntries());//查询清除后的剩余空间
   prefs.end();
   esp_wifi_restore();  //删除保存的wifi信息
-  Serial.println("连接信息已清空,准备重启设备..");
+  Serial.println("连接信息已清空，准备重启设备..");
 }

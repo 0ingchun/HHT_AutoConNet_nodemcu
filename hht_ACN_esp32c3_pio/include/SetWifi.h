@@ -5,12 +5,12 @@
 
 // #include <Arduino.h>
 
-#include <esp_efuse.h>
-#include <WiFi.h>
-#include <esp_wifi.h>
-#include <DNSServer.h>
-#include <WebServer.h>
-#include <Preferences.h>
+// #include <esp_efuse.h>
+// #include <WiFi.h>
+// #include <esp_wifi.h>
+// #include <DNSServer.h>
+// #include <WebServer.h>
+// #include <Preferences.h>
 
 extern String PrefSSID, PrefPassword, cityCode; 
 

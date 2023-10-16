@@ -1,6 +1,23 @@
+#include <Arduino.h>
+
+#include <WiFi.h>
+#include <esp_wifi.h>
+#include <esp_efuse.h>
+
+#include <DNSServer.h>
+#include <WebServer.h>
+#include <Preferences.h>
+#include "HTTPClient.h"
+
+#include "SetWifi.h"
+#include "LedStatus.h"
+
 #include "SetHHT.h"
 
-const char* hht_AP_NAME = "ANC_HHT_AP_";//Web配网模式下的AP-hht名字
+#include "SetHHT_html.h"
+
+
+const char* hht_AP_NAME = "AwA HHT _";//Web配网模式下的AP-hht名字
 String Pref_HHT_Username, Pref_HHT_Password, Pref_HHT_Domain, Pref_HHT_Interval ,Pref_HHT_FollowerUrl;
 
 //暂时存储hht账号密码
@@ -17,101 +34,6 @@ String hht_username = "12345678900";
 String hht_password = "123321";
 String hht_interval = "6.00";
 
-
-//配网页面代码 
-String hht_page_html = R"(
-<!DOCTYPE html>
-<html lang='en'>
-  <head>
-    <meta charset='UTF-8'>
-   
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
-    <title>ESP32配置HHT页面</title>
-    <style type="text/css">
-      * { margin: 0; padding: 0; }
-       html { height: 100%; }
-       h2 {text-align: center;color: #fff;line-height: 2.2;}
-       body { height: 100%; background-color: #1F6F4A; 50% 50% no-repeat; background-size: cover;}
-       .dowebok { position: absolute; left: 50%; top: 30%; width: 380px; height: 500px; margin: -200px 0 0 -200px; border: 3px solid #fff; border-radius: 10px; overflow: hidden;}
-       
-       .form-item { position: relative; width: 360px; margin: 0 auto; padding-bottom: 20px;}
-       .form-item input { width: 288px; height: 48px; padding-left: 10px; border: 1px solid #fff; border-radius: 25px; font-size: 18px; color: #fff; background-color: transparent; outline: none;}
-       .send_button { width: 360px; height: 50px; border: 0; border-radius: 25px; font-size: 18px; color: #1f6f4a; outline: none; cursor: pointer; background-color: #fff; }
-       
-       .tip { display: none; position: absolute; left: 20px; top: 52px; font-size: 14px; color: #f50; }
-       .reg-bar { width: 360px; margin: 20px auto 0; font-size: 14px; overflow: hidden;}
-       .reg-bar a { color: #fff; text-decoration: none; }
-       .reg-bar a:hover { text-decoration: underline; }
-       .reg-bar .reg { float: left; }
-       .reg-bar .forget { float: right; }
-       .dowebok ::-webkit-input-placeholder { font-size: 18px; line-height: 1.4; color: #fff;}
-       .dowebok :-moz-placeholder { font-size: 18px; line-height: 1.4; color: #fff;}
-       .dowebok ::-moz-placeholder { font-size: 18px; line-height: 1.4; color: #fff;}
-       .dowebok :-ms-input-placeholder { font-size: 18px; line-height: 1.4; color: #fff;}
-        
-       @media screen and (max-width: 500px) {
-       * { box-sizing: border-box; }
-       .dowebok { position: static; width: auto; height: auto; margin: 0 30px; border: 0; border-radius: 0; }
-       .logo { margin: 50px auto; }
-       .form-item { width: auto; }
-       .form-item input, .form-item button, .reg-bar { width: 100%; }
-       }
-       
-    </style>
-  </head>
-  
-  <body>
-    <div class="dowebok">
-      <h2>H H T 参 数 配 置</h2>
-      <form style='text-align: center;padding-top: 20px' name='input' action='/' method='POST'>  
-         <div class="form-item">
-          <input id="username" type="text" name='username' autocomplete="off" placeholder="HHT用户名">
-         </div>
-         <div class="form-item">
-          <input id="password" type="password" name='password' autocomplete="off" placeholder="HHT密码">
-         </div>
-         <div class="form-item">
-          <input id="domain" type="text" name='domain' autocomplete="off" placeholder="运营商代码,留空可能无法登录">
-         </div>
-         <div class="form-item">
-          <input id="interval" type="text" name='interval' autocomplete="off" placeholder="自动重连时间(单位：小时)，建议填写12">
-         </div>
-         <div class="form-item">
-           <div id="">
-            <input id="send_button" type='submit' value='保存并登录'>
-           </div>
-        </div>
-        <div class="form-item">
-          <div class="user_text">
-
-            <br>
-            <p><h3>填写【运营商代码】：</h3></p>
-              <h5>
-                “运营商代码”由若干字母组成，请参考下表，填写错误可能导致获取不到数据而无限重启
-                <br>
-                cmcc（中國移動），unicom（中國聯通），telecom（中國電信），default（默認）
-                <br>
-                运营商代码示例：若您是“中国移动”用户，请填写 cmcc
-              </h5>
-            </p>
-
-            <br>
-            <p><h3>填写【自动重连时间】：</h3></p>
-              <h5>
-                “自动重连时间”为阿拉伯数字（单位：小时），填写后设备经过该时间自动请求重新登录hht
-                <br>
-                小时制自动重连示例：每12小时自动重连HHT，请填写 12
-              </h5>
-            </p>
-
-          </div>
-         </div>
-        
-      </form> 
-     </div>
-  </body>
-</html>
-)";
 
 String generate_url(void){
   // randomSeed(millis());
@@ -138,7 +60,15 @@ DNSServer hht_dnsServer;//创建dnsServer实例
 
 WebServer hht_server(80);//创建WebServer
 
+
+unsigned long lastGetTime_SetHHT = 0;
+
 void hht_handleRoot() {//访问主页回调函数
+  lastGetTime_SetHHT = millis();  // 更新最后连接时间
+  LedStatus_Light(hht_led);
+  Serial.print("lastGetTime_SetHHT: ");
+  Serial.println(lastGetTime_SetHHT);
+
   hht_server.send(200, "text/html", hht_page_html);
 }
 
@@ -170,7 +100,15 @@ void hht_initDNS(void){//初始化DNS服务器
     else Serial.println("start dnsserver failed.");
 }
 
+unsigned long lastPostTime_SetHHT = 0;
+
 void hht_handleRootPost() {//Post回调函数
+    Serial.println("into void hht_handleRootPost()");
+    lastPostTime_SetHHT = millis();
+    LedStatus_Light(hht_led);
+    Serial.println("lastPostTime_SetHHT: ");
+    Serial.println(lastPostTime_SetHHT);
+
     String hhtuser="",hhtpass="",hhtdomain="",hhtfollowerUrl="",hhtinterval="";
     Serial.println("hht_handleRootPost");
 
@@ -341,6 +279,7 @@ void connectNewHHT(void){
 
 }
 
+unsigned long lastSetRunTime_SetHHT = 0;
 
 bool setHHT_Flag = false;
 void setHHT()
@@ -348,10 +287,25 @@ void setHHT()
     hht_initSoftAP();
     hht_initWebServer();
     hht_initDNS();
+    Serial.println("into void setHHT()");
+
     while (setHHT_Flag == false)
     {
         hht_server.handleClient();
         hht_dnsServer.processNextRequest();
+
+        //配置页面未超时自动重启，防止连接不上导致卡在配网页面
+        lastSetRunTime_SetHHT = millis();
+        Serial.print("lastConnectionTime_SetHHT-interval : ");
+        Serial.println(lastSetRunTime_SetHHT - lastPostTime_SetHHT);
+        LedStatus_Switch(hht_led);
+        if(lastSetRunTime_SetHHT - lastPostTime_SetHHT > (1000*60)*3)  //1000ms = 1s 一万毫秒等于一秒
+        {
+          Serial.println("Start to Reboot.");
+          ESP.restart();    //重启复位esp32
+          Serial.println("RebootED !");
+        }
+
         if (login_HHT_Flag == true)
         {
             hht_server.stop();

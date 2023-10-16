@@ -5,16 +5,16 @@
 
 // #include <Arduino.h>
 
-#include <WiFi.h>
-#include <esp_wifi.h>
-#include <esp_efuse.h>
+// #include <WiFi.h>
+// #include <esp_wifi.h>
+// #include <esp_efuse.h>
 
-#include <DNSServer.h>
-#include <WebServer.h>
-#include <Preferences.h>
-#include "HTTPClient.h"
+// #include <DNSServer.h>
+// #include <WebServer.h>
+// #include <Preferences.h>
+// #include "HTTPClient.h"
 
-#include "SetWifi.h"
+// #include "SetWifi.h"
 
 extern String Pref_HHT_Username, Pref_HHT_Password, Pref_HHT_Domain, Pref_HHT_Interval ,Pref_HHT_FollowerUrl;
 extern String hht_username, hht_password, hht_domain, hht_followerUrl ,hht_interval;

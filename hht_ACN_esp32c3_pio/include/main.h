@@ -1,20 +1,23 @@
 #pragma once
 
-#include <Arduino.h>
-#include <Preferences.h>
-#include <WiFi.h>
-#include <esp_wifi.h>
-// #include <ESP8266WiFi.h>
-// #include <WiFiClient.h>
-#include "HTTPClient.h"
+#ifndef _MAIN_H_
+#define _MAIN_H_
 
-// #include "gpioPos.h"
-#include "SetWifi.h"
-#include "SetHHT.h"
-#include "LedStatus.h"
-#include "TimeCharge.h"
+// #include <Arduino.h>
+// #include <Preferences.h>
+// #include <WiFi.h>
+// #include <esp_wifi.h>
+// // #include <ESP8266WiFi.h>
+// // #include <WiFiClient.h>
+// #include "HTTPClient.h"
 
-#include <esp_efuse.h>
+// // #include "gpioPos.h"
+// #include "SetWifi.h"
+// #include "SetHHT.h"
+// #include "LedStatus.h"
+// #include "TimeCharge.h"
+
+// #include <esp_efuse.h>
 
 const char* wifi_ssid = "keke";
 const char* wifi_password = "qp10al29zm38keke";
@@ -47,3 +50,5 @@ const int resetPin = 0;                    //设置重置按键引脚,用于删�
 String NowTime();
 
 void reset_detect();
+
+#endif
