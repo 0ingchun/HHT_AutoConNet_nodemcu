@@ -13,10 +13,13 @@
 
 - Arduino
 
+- stl
+
 
 ## 開發日志
 
 hht_ACN_esp32c3_pio 基本本地功能已實現 2023.9.1，api.HHT/ 是詐騙慣了，總是返回虛假的404，最終不再使用返回值檢測，通過get了*Du娘*作爲連接成功的返回值
+hht_ACN_esp32c3_pio 2023.10.17 更耐用戶造的控制邏輯，小紅薯片形式ui
 
 
 ## 使用説明
@@ -31,7 +34,7 @@ hht_ACN_esp32c3_pio 基本本地功能已實現 2023.9.1，api.HHT/ 是詐騙慣
 
 5. 編譯后燒錄固件
 
-6. 觸摸gpio0恢復出廠設置
+6. -- 觸摸gpio0恢復出廠設置 -- 按rst后重啓，開機后長按fac直到兩個指示燈都閃爍后，重置所有數據
 
 
 ## TODO
@@ -48,6 +51,10 @@ hht_ACN_esp32c3_pio 基本本地功能已實現 2023.9.1，api.HHT/ 是詐騙慣
 - [ ] rtos多task调度
 - [ ] 掉電不丟失數據管理
 - [ ] 配置页面填写数据正确检测
+- [X] 掉公網檢測與重連
+- [X] wifi掉綫重連
+- [X] 用戶配置時連接html檢測
+- [ ] 美化html與ui
 
 
 * 雲服務 *
@@ -77,7 +84,7 @@ hht_ACN_esp32c3_pio 基本本地功能已實現 2023.9.1，api.HHT/ 是詐騙慣
 - [X] 恢復出廠設置引脚開孔
 - [ ] 一面浮雕上使用説明書
 - [ ] 镂空logo
-- [ ] 圆角
+- [X] 圆角
 - [ ] 
 - [ ] 把192.168.4.1生成貼紙貼上
 
@@ -99,7 +106,12 @@ hht_ACN_esp32c3_pio 基本本地功能已實現 2023.9.1，api.HHT/ 是詐騙慣
 
 - 本项目收录于 https://github.com/JMasterFull-StackGroup/4w4-2-ssypu —— 4w4 GoTo Pussy
 
-- 感謝項目 https://github.com/XJTLU-Geek/hht-network 和 https://github.com/kaijianyi/NJUCM_NET 的支持和幫助
+- 感謝項目 https://github.com/XJTLU-Geek/hht-network 和 https://github.com/kaijianyi/NJUCM_NET 提供的靈感，支持和幫助
 
 - 親情贊助 / 商務大使 /形象代言 : **山坤坤**
 
+
+
+# FRIENDLY-LINK
+
+- 開往 基于ESP8266 NodeMCU 1.0的深澜校园网自动登录 https://github.com/chillsoul/ESP8266-Srun3kAutoLogin
