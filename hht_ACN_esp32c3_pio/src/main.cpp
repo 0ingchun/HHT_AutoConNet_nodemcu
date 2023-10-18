@@ -365,6 +365,7 @@ void reset_detect()
     Serial.println("Wait for resetPIN.");
     
     //延时防抖并闪灯
+    delay(750);
     LedStatus_Switch(wifi_led);
     delay(750);
     LedStatus_Switch(wifi_led);
@@ -374,7 +375,6 @@ void reset_detect()
       LedStatus_Switch(hht_led);
       delay(750);
       LedStatus_Switch(hht_led);
-      delay(750);
     // delay(3000);
     
       if(!digitalRead(bootPin) /* || analogRead(resetPin) == 0 || analogRead(resetPin) == 4095 || analogRead(resetPin) <= 600 */ ) 
@@ -492,7 +492,7 @@ void loop() {
   delay(100); // seconds delay
   randomSeed(millis());
   delay(random(0, 400));
-  LedStatus_Quench(hht_led);
+  LedStatus_Quench(wifi_led);
 
 
 //HHT状态检测
