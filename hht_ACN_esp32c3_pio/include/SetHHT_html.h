@@ -157,7 +157,6 @@ String hht_page_html = R"(
             </select>
           </div>
 
-      </div>
       <script>
         document.addEventListener("DOMContentLoaded", function() {
         var slider = document.getElementById("interval");
@@ -172,9 +171,13 @@ String hht_page_html = R"(
         }
         });
       </script>
+      
       <div class="form-item">
-        <input id="interval" type="range" name="interval" min="1" max="24" step="0.5">
-        <span id="intervalDisplay">1</span> 小时
+        <span id="intervalDisplay">12</span> 小时
+        <br>
+        <input id="interval" type="range" name="interval" min="0.5" max="23.5" step="0.5">
+        
+      </div>
 
             <p><h3>⏰填写【自动重连时间】：⏰</h3></p>
               <h5>

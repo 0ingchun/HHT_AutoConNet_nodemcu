@@ -71,7 +71,7 @@ void initDNS(void){//初始化DNS服务器
 unsigned long lastPostTime_SetWiFi = 0;
 
 void handleRootPost() {//Post回调函数
-  Serial.println("into void handleRootPost()");
+  Serial.println("void handleRootPost()");
   lastPostTime_SetWiFi = millis();
   LedStatus_Light(wifi_led);
   Serial.println("lastPostTime_SetWiFi: ");
@@ -117,7 +117,7 @@ String wifiid="",wifipass="",cityid="";
   prefs.putString( "citycode", cityid);
   prefs.end();
 
-  server.send(200, "text/html", "<meta charset='UTF-8'><h1>保存成功，ESP32重启中...</h1>");//返回保存成功页面
+  server.send(200, "text/html", "<meta charset='UTF-8'><h1>保存成功，AutoConNetor重启中...</h1>");//返回保存成功页面
   delay(2000);
   //连接wifi
   //connectNewWifi();

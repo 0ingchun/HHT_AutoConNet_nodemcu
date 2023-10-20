@@ -24,6 +24,8 @@ extern bool setHHT_Flag;
 extern bool login_HHT_Flag;
 extern String payload;
 
+String generate_url(void);
+
 void hht_handleRoot();  //访问主页回调函数
 
 void hht_initSoftAP(void);  //初始化AP模式
@@ -40,11 +42,15 @@ void setHHT();
 
 void DeleteHHT();
 
-void HHT_Connect(String hht_domain, String hht_username, String hht_password, String hht_followerUrl, bool* p_login_HHT_Flag);
+void HHT_Connect_Soft(String hht_domain, String hht_username, String hht_password, String hht_followerUrl, bool* p_login_HHT_Flag);
 
 void HHT_Connect_Hard(String hht_domain, String hht_username, String hht_password, String hht_followerUrl, bool* p_login_HHT_Flag);
 
 void HHT_Connect_ping(bool* p_login_HHT_Flag);
+
+void HHT_Connect_Both(void);
+
+void HHT_Connect_loop(void);
 
 // void setHHT_new();
 

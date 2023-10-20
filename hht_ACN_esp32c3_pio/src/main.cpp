@@ -16,6 +16,8 @@
 
 #include "main.h"
 
+// #include <bits/stdc++.h>
+
 /*
 惠湖通 自动网关 脚本
 
@@ -119,19 +121,41 @@ void Web_SetWifi_loop()
   }
 }
 
+void Drop_Wifi_REconnect()
+{
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.println("void Drop_Wifi_REconnect(): Wifi Connection Perhaps Dropped!");
+
+    WiFi.disconnect();
+    Serial.println("已断开WiFi连接！");
+      
+      byte i = 0;
+      while (WiFi.status() != WL_CONNECTED)
+      {   
+        i++;
+        Serial.print('.');
+        delay(500);
+
+        if (i > 20)
+        {
+          Serial.println("Start to Reboot.");
+          ESP.restart();    //重启复位esp32
+          Serial.println("RebootED !");
+        }
+
+        LedStatus_Switch(wifi_led);
+        //  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); //板载led灯闪烁
+      }
+  }
+}
 
 //-----------------------------------HHT-------------------------------------//
 
-void HHT_Connect_Both()
-{
-  HHT_Connect(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
-  delay(500);
-  HHT_Connect_Hard(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
-      
-}
-
 void Web_SetHHT_setup()
 {
+  Serial.println("void Web_SetHHT_setup()");
+
   // Serial.begin(115200);
   //delay(10);
   pinMode(LED_BUILTIN, OUTPUT); //板载led灯作为指示
@@ -213,28 +237,31 @@ Serial.println("-------wdf?------");
     hht_followerUrl = Pref_HHT_FollowerUrl.c_str();
     hht_interval = Pref_HHT_Interval.c_str();
 
-  byte j = 0;
-  while (login_HHT_Flag == false)
-  {   
+  HHT_Connect_loop();
 
-      // HHT_Connect(Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_Domain.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
-    HHT_Connect_Both();
+  // byte j = 0;
+  // while (login_HHT_Flag == false)
+  // {   
 
-      Serial.println("login_HHT_Flag = " + String(login_HHT_Flag));
+  //     // HHT_Connect(Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_Domain.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
+  //   HHT_Connect_Both();
+  //   LedStatus_Switch(hht_led);
 
-    j++;
-    Serial.print("。");
-    delay(500);
+  //     Serial.println("login_HHT_Flag = " + String(login_HHT_Flag));
 
-    if (j > 10)
-    {
-      Serial.println("HHT Login Failed! because Timeout 。");
-      setHHT();
-    }
+  //   j++;
+  //   Serial.print("。");
+  //   delay(500);
 
-    LedStatus_Switch(hht_led);
-     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); //板载led灯闪烁
-  }
+  //   if (j > 10)
+  //   {
+  //     Serial.println("HHT Login Failed! because Timeout 。");
+  //     setHHT();
+  //   }
+
+    
+  //    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); //板载led灯闪烁
+  // }
 
   Serial.println("void Web_SetHHT_setup(): HHT Login Success!");
 
@@ -246,45 +273,43 @@ Serial.println("-------wdf?------");
 
 void Drop_Ping_REconnect()
 {
+  Serial.println("void Drop_Ping_REconnect()");
+
   HHT_Connect_ping(&login_HHT_Flag);
+
   if (!login_HHT_Flag)
   {
-    Serial.println("void Drop_Ping_REconnect(): WWW Ping Failed! HHT Perhaps Dropped!");
-    HHT_Connect_Both();
-  }
-}
+    Serial.println("WWW Ping Failed! HHT Perhaps Dropped!");
+    HHT_Connect_loop();
 
-void Drop_Wifi_REconnect()
-{
-  if (WiFi.status() != WL_CONNECTED)
-  {
-    Serial.println("void Drop_Wifi_REconnect(): Wifi Connection Perhaps Dropped!");
+    // HHT_Connect_Both();
+    //   while (login_HHT_Flag == false)
+    //   {   
 
-    WiFi.disconnect();
-    Serial.println("已断开WiFi连接！");
-      
-      byte i = 0;
-      while (WiFi.status() != WL_CONNECTED)
-      {   
-        i++;
-        Serial.print('.');
-        delay(500);
+    //     // HHT_Connect(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
+    //     // delay(500);
+    //     // HHT_Connect_Hard(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
+    //   HHT_Connect_Both();
+    //   LedStatus_Switch(hht_led);
 
-        if (i > 20)
-        {
-          Serial.println("Start to Reboot.");
-          ESP.restart();    //重启复位esp32
-          Serial.println("RebootED !");
-        }
+    //     j++;
+    //     Serial.print("!");
+    //     delay(1000);
 
-        LedStatus_Switch(wifi_led);
-        //  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); //板载led灯闪烁
-      }
+    //     // if (j > 10)
+    //     // {
+    //     //   Serial.println("HHT Login Failed! because Timeout 。");
+    //     //   setHHT();
+    //     // }
+    //     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); //板载led灯闪烁
+    //   }
   }
 }
 
 void Internal_HHT_Reconnect(String s_hht_interval)
 {
+  Serial.println("void Internal_HHT_Reconnect()");
+
   Serial.print("s_hht_interval to float = ");
   Serial.println(s_hht_interval.toFloat());
   Serial.print("Pref_HHT_Interval = ");
@@ -298,28 +323,32 @@ void Internal_HHT_Reconnect(String s_hht_interval)
     if (currentMillis - previousMillis >= interval_to_ms)
     {
       Serial.println("Interval_HHT_Reconnect():  Start to Reconnect HHT!");
-      
       login_HHT_Flag == false;
-      byte j = 0;
-      while (login_HHT_Flag == false)
-      {   
 
-        // HHT_Connect(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
-        // delay(500);
-        // HHT_Connect_Hard(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
-      HHT_Connect_Both();
+      HHT_Connect_loop();
 
-        j++;
-        Serial.print("!");
-        delay(1000);
+      // byte j = 0;
+      // while (login_HHT_Flag == false)
+      // {   
 
-        // if (j > 10)
-        // {
-        //   Serial.println("HHT Login Failed! because Timeout 。");
-        //   setHHT();
-        // }
-        digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); //板载led灯闪烁
-      }
+      //   // HHT_Connect(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
+      //   // delay(500);
+      //   // HHT_Connect_Hard(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
+      // HHT_Connect_Both();
+      // LedStatus_Switch(hht_led);
+
+      //   j++;
+      //   Serial.print("!");
+      //   delay(1000);
+
+      //   if (j > 10)
+      //   {
+      //     Serial.println("HHT Login Failed! because Timeout 。");
+      //     setHHT();
+      //   }
+
+      //   digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); //板载led灯闪烁
+      // }
 
       struct tm timeInfo; //声明一个结构体
 
@@ -339,6 +368,7 @@ void Internal_HHT_Reconnect(String s_hht_interval)
   //  HHT_Connect(Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_Domain.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
   // }
 }
+
 //-----------------------------------SYSTEM-------------------------------------//
 
 /*
@@ -360,6 +390,8 @@ void reset_detect_old()
 
 void reset_detect()
 {
+  Serial.println("void reset_detect()");
+
   if( !digitalRead(bootPin) /* || analogRead(resetPin) == 0 || analogRead(resetPin) == 4095 || analogRead(resetPin) <= 600 */ ) 
   {
     Serial.println("Wait for resetPIN.");
@@ -506,7 +538,6 @@ void loop() {
   randomSeed(millis());
   delay(random(0, 400));
   LedStatus_Quench(hht_led);
-
 
   }
 }

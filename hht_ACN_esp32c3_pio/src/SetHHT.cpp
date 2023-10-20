@@ -36,6 +36,8 @@ String hht_interval = "6.00";
 
 
 String generate_url(void){
+  Serial.println("void generate_url()");
+
   // randomSeed(millis());
   // char url_switch_flag = random(0, 1);
   String s_testUrl = "http://www.baidu.com";
@@ -103,7 +105,7 @@ void hht_initDNS(void){//初始化DNS服务器
 unsigned long lastPostTime_SetHHT = 0;
 
 void hht_handleRootPost() {//Post回调函数
-    Serial.println("into void hht_handleRootPost()");
+    Serial.println("void hht_handleRootPost()");
     lastPostTime_SetHHT = millis();
     LedStatus_Light(hht_led);
     Serial.println("lastPostTime_SetHHT: ");
@@ -182,7 +184,7 @@ void hht_handleRootPost() {//Post回调函数
     prefs.end();
     Serial.println("Get HHT_PREFerences Success!");
 
-    hht_server.send(200, "text/html", "<meta charset='UTF-8'><h1>保存HHT成功，ESP32重启中...</h1>");//返回保存成功页面
+    hht_server.send(200, "text/html", "<meta charset='UTF-8'><h1>保存HHT成功，AutoConNetor重启中...</h1>");//返回保存成功页面
     delay(2000);
     //连接wifi
     //connectNewWifi();
@@ -202,7 +204,8 @@ void hht_initWebServer(void){//初始化WebServer
 }
 
 void connectNewHHT(void){
-    
+    Serial.println("void connectNewHHT()");
+
     Preferences prefs;
   prefs.begin("hht");
   if (prefs.isKey("hht_username"),"nano")
@@ -275,7 +278,9 @@ void connectNewHHT(void){
     //     Serial.println(WiFi.localIP());
     //     hht_server.stop();
     // }
-    HHT_Connect(hht_domain, hht_username, hht_password, hht_followerUrl, &setHHT_Flag);
+
+    HHT_Connect_loop();
+    // HHT_Connect(hht_domain, hht_username, hht_password, hht_followerUrl, &setHHT_Flag);
 
 }
 
@@ -284,38 +289,41 @@ unsigned long lastSetRunTime_SetHHT = 0;
 bool setHHT_Flag = false;
 void setHHT()
 {
-    hht_initSoftAP();
-    hht_initWebServer();
-    hht_initDNS();
-    Serial.println("into void setHHT()");
+  Serial.println("void setHHT()");
 
-    while (setHHT_Flag == false)
-    {
-        hht_server.handleClient();
-        hht_dnsServer.processNextRequest();
+  hht_initSoftAP();
+  hht_initWebServer();
+  hht_initDNS();
+  Serial.println("into void setHHT()");
 
-        //配置页面未超时自动重启，防止连接不上导致卡在配网页面
-        lastSetRunTime_SetHHT = millis();
-        Serial.print("lastConnectionTime_SetHHT-interval : ");
-        Serial.println(lastSetRunTime_SetHHT - lastPostTime_SetHHT);
-        LedStatus_Switch(hht_led);
-        if(lastSetRunTime_SetHHT - lastPostTime_SetHHT > (1000*60)*3)  //1000ms = 1s 一万毫秒等于一秒
-        {
-          Serial.println("Start to Reboot.");
-          ESP.restart();    //重启复位esp32
-          Serial.println("RebootED !");
-        }
+  while (setHHT_Flag == false)
+  {
+      hht_server.handleClient();
+      hht_dnsServer.processNextRequest();
 
-        if (login_HHT_Flag == true)
-        {
-            hht_server.stop();
-            setHHT_Flag = true;
-        }
-    }
+      //配置页面未超时自动重启，防止连接不上导致卡在配网页面
+      lastSetRunTime_SetHHT = millis();
+      Serial.print("lastConnectionTime_SetHHT-interval : ");
+      Serial.println(lastSetRunTime_SetHHT - lastPostTime_SetHHT);
+      LedStatus_Switch(hht_led);
+      if(lastSetRunTime_SetHHT - lastPostTime_SetHHT > (1000*60)*3)  //1000ms = 1s 一万毫秒等于一秒
+      {
+        Serial.println("Start to Reboot.");
+        ESP.restart();    //重启复位esp32
+        Serial.println("RebootED !");
+      }
+
+      if (login_HHT_Flag == true)
+      {
+          hht_server.stop();
+          setHHT_Flag = true;
+      }
+  }
 }
 
 //删除保存的hht信息
 void DeleteHHT() {
+    Serial.println("DeleteHHT()");
     Preferences prefs;
     prefs.begin("hht",false);//为false才能删除键值
     Serial.println(prefs.freeEntries());//查询清除前的剩余空间
@@ -338,14 +346,15 @@ void DeleteHHT() {
 
 String payload = "{\"nano\":\"nano\"}";
 bool login_HHT_Flag = false;
-void HHT_Connect(String s_hht_domain, String s_hht_username, String s_hht_password, String s_hht_followerUrl, bool* p_login_HHT_Flag)
+void HHT_Connect_Soft(String s_hht_domain, String s_hht_username, String s_hht_password, String s_hht_followerUrl, bool* p_login_HHT_Flag)
 {
+  Serial.println("void HHT_Connect_Soft()");
   if (WiFi.status() == WL_CONNECTED) {
 
     // WiFiClient c;
 	HTTPClient http;
 	http.begin(s_hht_followerUrl); //HTTP begin
-  Serial.println("void HHT_Connect(): http try to connect: " + s_hht_followerUrl);
+  Serial.println("http try to connect: " + s_hht_followerUrl);
   // http.begin("http://10.10.16.12/api/portal/v1/login");
   //http.begin("http://www.bing.com");
 
@@ -412,12 +421,14 @@ void HHT_Connect(String s_hht_domain, String s_hht_username, String s_hht_passwo
 
 void HHT_Connect_Hard(String s_hht_domain, String s_hht_username, String s_hht_password, String s_hht_followerUrl, bool* p_login_HHT_Flag)
 {
+  Serial.println("void HHT_Connect_Hard()");
+
   if (WiFi.status() == WL_CONNECTED) {
 
     // WiFiClient c;
 	HTTPClient http;
 	http.begin(s_hht_followerUrl); //HTTP begin
-  Serial.println("void HHT_Connect_Hard(): http try to connect: " + s_hht_followerUrl);
+  Serial.println("http try to connect: " + s_hht_followerUrl);
   // http.begin("http://10.10.16.12/api/portal/v1/login");
   //http.begin("http://www.bing.com");
 
@@ -502,27 +513,76 @@ void HHT_Connect_ping(bool* p_login_HHT_Flag)
   if (WiFi.status() == WL_CONNECTED) {
 
     // WiFiClient c;
-	HTTPClient http;
+	  HTTPClient http;
 
-String s_testUrl = generate_url();
+    String s_testUrl = generate_url();
 
-      // String s_testUrl = "http://www.baidu.com";
-      http.begin(s_testUrl); //HTTP begin
+    // String s_testUrl = "http://www.baidu.com";
+    http.begin(s_testUrl); //HTTP begin
+
+    byte i = 0;
+    while(*p_login_HHT_Flag = false && i < 3)
+    {
       Serial.println("void HHT_Connect_Hard(): http try to connect: " + s_testUrl);
       int httpResponseCode = http.GET();
       Serial.printf("HTTP Get Code: %d\r\n", httpResponseCode);
 
       if (httpResponseCode == HTTP_CODE_OK) {
-        String response = http.getString();
+      String response = http.getString();
         *p_login_HHT_Flag = true;
       }
       else {
         Serial.println("HTTP request failed");
         *p_login_HHT_Flag = false;
       }
+
+      i++;
+      Serial.print("*");
+      delay(500);
+    }
+
+    http.end();
   }
 }
 
+void HHT_Connect_Both()
+{
+  Serial.println("void HHT_Connect_Both()");
+  HHT_Connect_Soft(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
+  delay(250);
+  HHT_Connect_Hard(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
+  delay(250);
+}
+
+void HHT_Connect_loop(){
+  Serial.println("void HHT_Connect_loop()");
+
+  byte j = 0;
+  while (login_HHT_Flag == false)
+  {   
+
+    // HHT_Connect(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
+    // delay(500);
+    // HHT_Connect_Hard(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
+    HHT_Connect_Both();
+    LedStatus_Switch(hht_led);
+    Serial.println("login_HHT_Flag = " + String(login_HHT_Flag));
+
+    Serial.print("!");
+    j++;
+    Serial.print("loop Time : ");
+    Serial.println(j);
+
+    delay(500);
+
+    if (j > 5)
+    {
+      Serial.println("HHT Login Failed! because Timeout 。");
+      setHHT();
+    }
+    
+  }
+}
 
 // bool setHHT_Flag_new = false;
 // void setHHT_new()
