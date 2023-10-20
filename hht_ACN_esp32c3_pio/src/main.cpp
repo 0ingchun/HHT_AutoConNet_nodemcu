@@ -275,7 +275,22 @@ void Drop_Ping_REconnect()
 {
   Serial.println("void Drop_Ping_REconnect()");
 
+  Serial.println("login_HHT_Flag = " + String(login_HHT_Flag));
+
+  byte k = 0;
+  do {
+  k++;
   HHT_Connect_ping(&login_HHT_Flag);
+  Serial.print("loop Time k: ");
+  Serial.println(k);
+  if(login_HHT_Flag == true)
+  {
+    break;
+  }
+  delay(50);
+  } while(k < 2);
+  
+  Serial.println("login_HHT_Flag = " + String(login_HHT_Flag));
 
   if (!login_HHT_Flag)
   {
@@ -523,20 +538,22 @@ void loop() {
 
   delay(100); // seconds delay
   randomSeed(millis());
-  delay(random(0, 400));
+  delay(random(0, 150));
   LedStatus_Quench(wifi_led);
 
 
 //HHT状态检测
+// Serial.println("login_HHT_Flag = " + String(login_HHT_Flag));
   reset_detect();
   LedStatus_Light(hht_led);
 
     Drop_Ping_REconnect();
+Serial.println("login_HHT_Flag = " + String(login_HHT_Flag));
     Internal_HHT_Reconnect(Pref_HHT_Interval.c_str());
-
+Serial.println("login_HHT_Flag = " + String(login_HHT_Flag));
   delay(100); // seconds delay
   randomSeed(millis());
-  delay(random(0, 400));
+  delay(random(0, 150));
   LedStatus_Quench(hht_led);
 
   }

@@ -176,7 +176,6 @@ String hht_page_html = R"(
         <span id="intervalDisplay">12</span> 小时
         <br>
         <input id="interval" type="range" name="interval" min="0.5" max="23.5" step="0.5">
-        
       </div>
 
             <p><h3>⏰填写【自动重连时间】：⏰</h3></p>

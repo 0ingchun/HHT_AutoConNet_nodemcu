@@ -510,38 +510,59 @@ void HHT_Connect_Hard(String s_hht_domain, String s_hht_username, String s_hht_p
 
 void HHT_Connect_ping(bool* p_login_HHT_Flag)
 {
+  Serial.println("void HHT_Connect_ping()");
+
+  // Serial.println("wdfwdfwdf----------------------+++++++++");
+  // Serial.println(WiFi.status());
+
   if (WiFi.status() == WL_CONNECTED) {
 
     // WiFiClient c;
-	  HTTPClient http;
 
-    String s_testUrl = generate_url();
+    // Serial.println("^^^^^^^^^^^^^^^^^^^^^^^+++++++++here!!!!!!!!!!");
+    // Serial.println(*p_login_HHT_Flag);
 
-    // String s_testUrl = "http://www.baidu.com";
-    http.begin(s_testUrl); //HTTP begin
+    // byte k = 0;
+    // while(*p_login_HHT_Flag == false)
+    // {
 
-    byte i = 0;
-    while(*p_login_HHT_Flag = false && i < 3)
-    {
-      Serial.println("void HHT_Connect_Hard(): http try to connect: " + s_testUrl);
+      HTTPClient http;
+      String s_testUrl = generate_url();
+      // String s_testUrl = "http://www.baidu.com";
+      http.begin(s_testUrl); //HTTP begin
+
+      Serial.println("http try to connect GET : " + s_testUrl);
       int httpResponseCode = http.GET();
       Serial.printf("HTTP Get Code: %d\r\n", httpResponseCode);
+
+      // Serial.println("@@@@@@@@@@@whynorun###############################!!!!!!!!!!");
 
       if (httpResponseCode == HTTP_CODE_OK) {
       String response = http.getString();
         *p_login_HHT_Flag = true;
+        // break;
       }
       else {
         Serial.println("HTTP request failed");
         *p_login_HHT_Flag = false;
       }
 
-      i++;
-      Serial.print("*");
-      delay(500);
-    }
+      http.end();
 
-    http.end();
+    //   k++;
+    //   Serial.print("*");
+
+    //   if (*p_login_HHT_Flag == true || k > 3)
+    //   {
+    //     break;
+    //   }
+
+    //   delay(250);
+    // }
+
+    // Serial.println(k);
+
+    Serial.println("login_HHT_Flag = " + String(login_HHT_Flag));
   }
 }
 
@@ -549,15 +570,17 @@ void HHT_Connect_Both()
 {
   Serial.println("void HHT_Connect_Both()");
   HHT_Connect_Soft(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
-  delay(250);
+  delay(100);
   HHT_Connect_Hard(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
-  delay(250);
+  delay(100);
 }
 
 void HHT_Connect_loop(){
   Serial.println("void HHT_Connect_loop()");
 
   byte j = 0;
+
+  Serial.println("login_HHT_Flag = " + String(login_HHT_Flag));
   while (login_HHT_Flag == false)
   {   
 
@@ -573,7 +596,7 @@ void HHT_Connect_loop(){
     Serial.print("loop Time : ");
     Serial.println(j);
 
-    delay(500);
+    delay(50);
 
     if (j > 5)
     {
