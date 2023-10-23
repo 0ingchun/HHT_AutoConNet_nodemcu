@@ -184,8 +184,8 @@ void hht_handleRootPost() {//Post回调函数
     prefs.end();
     Serial.println("Get HHT_PREFerences Success!");
 
-    hht_server.send(200, "text/html", "<meta charset='UTF-8'><h1>保存HHT成功，AutoConNetor重启中...</h1>");//返回保存成功页面
-    delay(2000);
+    hht_server.send(200, "text/html", hht_ok_page_html);//返回保存成功页面
+    delay(3500);
     //连接wifi
     //connectNewWifi();
 
@@ -569,8 +569,10 @@ void HHT_Connect_ping(bool* p_login_HHT_Flag)
 void HHT_Connect_Both()
 {
   Serial.println("void HHT_Connect_Both()");
+  LedStatus_Switch(hht_led);
   HHT_Connect_Soft(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
   delay(100);
+  LedStatus_Switch(hht_led);
   HHT_Connect_Hard(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
   delay(100);
 }
@@ -597,6 +599,7 @@ void HHT_Connect_loop(){
     Serial.println(j);
 
     delay(50);
+    LedStatus_Switch(hht_led);
 
     if (j > 5)
     {

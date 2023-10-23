@@ -37,7 +37,7 @@ void handleRoot() {//访问主页回调函数
   Serial.print("lastGetTime_SetWiFi: ");
   Serial.println(lastGetTime_SetWiFi);
 
-  server.send(200, "text/html", page_html);
+  server.send(200, "text/html", wifi_page_html);
 }
 
 void initSoftAP(void){//初始化AP模式
@@ -117,14 +117,15 @@ String wifiid="",wifipass="",cityid="";
   prefs.putString( "citycode", cityid);
   prefs.end();
 
-  server.send(200, "text/html", "<meta charset='UTF-8'><h1>保存成功，AutoConNetor重启中...</h1>");//返回保存成功页面
-  delay(2000);
+  server.send(200, "text/html", wifi_ok_page_html);//返回保存成功页面
+  delay(3500);
   //连接wifi
   //connectNewWifi();
 
   Serial.println("ESP32 restart...");
   ESP.restart(); //重启ESP32
 }
+
 void initWebServer(void){//初始化WebServer
   //server.on("/",handleRoot);
   //上面那行必须以下面这种格式去写否则无法强制门户

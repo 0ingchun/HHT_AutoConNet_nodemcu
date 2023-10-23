@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 //配网页面代码 
-String page_html = R"(
+String wifi_page_html = R"(
 <!DOCTYPE html>
 <html lang='en'>
   <head>
@@ -51,6 +51,7 @@ String page_html = R"(
 
             <br>
             <p><h3>📶填写【WiFi 名称/密码】:📶</h3></p>
+            <p>
               <h5>
                 您的路由器wifi名称，如有2.4ghz，则填写2.4ghz的wifi名称
                 <br>
@@ -84,6 +85,7 @@ String page_html = R"(
         <div class="form-item">
           <div class="user_text">
             <br>
+
   <!-- 
             <p><h3>🏙️如何获取cityCode：🏙️</h3></p>
               <h5>
@@ -96,6 +98,7 @@ String page_html = R"(
 
             <br>
             <p><h3>🍡 AutoConNetor for HHT 🍡</h3></p>
+            <p>
               <h5>
               HuiHuTong自动登录器 - Powered by 0.C.
               </h5>
@@ -125,4 +128,18 @@ String page_html = R"(
     </script>
   </body>
 </html>
+)";
+
+
+String wifi_ok_page_html = R"(
+  
+  <meta charset='UTF-8'>
+  
+  <h1>保存成功，AutoConNetor重启中...</h1>
+
+  <br>
+
+  <p><h2>下一步：请重启您的WiFi，并寻找“AwA HHT _xxx”的wWiFi热点，配置宽带参数</h2></p>
+
+  <h3>重置设备：先点击RST按钮，然后再快速按住FAC按钮不放，直到WiFi灯和HHT灯分别亮暗后放开，设备重置</h3>
 )";

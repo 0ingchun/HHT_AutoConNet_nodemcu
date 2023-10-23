@@ -138,6 +138,7 @@ String hht_page_html = R"(
 
             <br>
             <p><h3>🤡填写【宽带 账号/密码】:🤡</h3></p>
+            <p>
               <h5>
                 用户名一般为 手机号
                 <br>
@@ -157,6 +158,7 @@ String hht_page_html = R"(
 
             <br>
             <p><h3>🌐选择【宽带运营商】:🌐</h3></p>
+            <p>
               <h5>
                 一般为您办卡手机号的运营商
                 <br>
@@ -170,11 +172,11 @@ String hht_page_html = R"(
               <option value="cmcc">中国移动 (CMCC)</option>
               <option value="unicom">中国联通 (Unicom)</option>
               <option value="telecom">中国电信 (Telecom)</option>
-              <option value="default">默认 (Default)</option>
             </select>
           </div>
 
             <p><h3>⏰拖动修改【自动重连时间】:⏰</h3></p>
+            <p>
               <h5>
                 “自动重连时间”（单位：小时/hour），经过该时间后设备自动重新登录宽带
                 <br>
@@ -218,6 +220,7 @@ String hht_page_html = R"(
 
             <br>
             <p><h3>🍡 AutoConNetor for HHT 🍡</h3></p>
+            <p>
               <h5>
               HuiHuTong自动登录器 - Powered by 0.C.
               </h5>
@@ -247,4 +250,16 @@ String hht_page_html = R"(
     </script>
   </body>
 </html>
+)";
+
+
+String hht_ok_page_html = R"(
+  
+  <meta charset='UTF-8'>
+  
+  <h1>保存HHT成功，AutoConNetor重启中...</h1>
+
+  <br>
+  
+  <h3>重置设备：先点击RST按钮，然后再快速按住FAC按钮不放，直到WiFi灯和HHT灯分别亮暗后放开，设备重置</h3>
 )";
