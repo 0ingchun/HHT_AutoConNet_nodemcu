@@ -10,7 +10,7 @@ String page_html = R"(
     <meta charset='UTF-8'>
    
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
-    <title>配置WiFi🛜页面</title>
+    <title>配置WiFi📶页面</title>
     <style type="text/css">
       * { margin: 0; padding: 0; }
        html { height: 100%; }
@@ -46,19 +46,13 @@ String page_html = R"(
   
   <body>
     <div class="dowebok">
-      <h2>WiFi🛜参数配置</h2>
-      <form style='text-align: center;padding-top: 20px' name='input' action='/' method='POST'>  
-         <div class="form-item">
-          <input id="username" type="text" name='ssid' autocomplete="off" placeholder="WiFi🛜名称">
-         </div>
-         <div class="form-item">
-          <input id="password" type="password" name='password' autocomplete="off" placeholder="WiFi🛜密码">
-         </div>
+
+      <h2>>WiFi📶参数配置<</h2>
 
             <br>
-            <p><h3>🛜填写【WiFi 名称/密码】：🛜</h3></p>
+            <p><h3>📶填写【WiFi 名称/密码】:📶</h3></p>
               <h5>
-                您的路由器wifi名称，如有2.4ghz,则填写2.4ghz的wifi名称
+                您的路由器wifi名称，如有2.4ghz，则填写2.4ghz的wifi名称
                 <br>
                 您路由器wifi的密码
                 <br>
@@ -66,11 +60,22 @@ String page_html = R"(
             </p>
             <br>
 
+      <form style='text-align: center;padding-top: 20px' name='input' action='/' method='POST'>  
+         <div class="form-item">
+          <input id="username" type="text" name='ssid' autocomplete="off" placeholder="WiFi📶名称">
+         </div>
+         <div class="form-item">
+          <input id="password" type="password" name='password' autocomplete="off" placeholder="WiFi📶密码">
+         </div>
+
   <!--
          <div class="form-item">
           <input id="citycode" type="citycode" name='citycode' autocomplete="off" placeholder="城市代码🌆,留空则自动定位获取">
          </div>
   -->
+
+      <br>
+
          <div class="form-item">
            <div id="">
             <input id="send_button" type='submit' value='😅 保存并连接 😅'>
@@ -86,6 +91,8 @@ String page_html = R"(
               </h5>
             </p>
   -->
+
+      <br>
 
             <br>
             <p><h3>🍡 AutoConNetor for HHT 🍡</h3></p>

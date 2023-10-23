@@ -10,7 +10,7 @@ String hht_page_html = R"(
     <meta charset='UTF-8'>
    
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
-    <title>配置HuiHuTong🤡页面</title>
+    <title>配置HHT宽带🤡页面</title>
     <style type="text/css">
       * { margin: 0; padding: 0; }
        html { height: 100%; }
@@ -89,6 +89,13 @@ String hht_page_html = R"(
 		  border-radius: 4px; /* 圆角 */
 		}
 
+    #intervalDisplay {
+      font-size: 18px;  /* 设置字体大小 */
+      color: #fff;      /* 设置字体颜色为白色 */
+      line-height: 1.4; /* 设置行高 */
+    }
+
+
 		.form-item input[type="range"]::-moz-range-track {
 		  width: 100%; /* 宽度 */
 		  height: 8px; /* 高度 */
@@ -127,21 +134,31 @@ String hht_page_html = R"(
   
   <body>
     <div class="dowebok">
-      <h2>惠糊嗵🤡参数配置</h2>
-      <form style='text-align: center;padding-top: 20px' name='input' action='/' method='POST'>  
-         <div class="form-item">
-          <input id="username" type="text" name='username' autocomplete="off" placeholder="惠糊嗵🤡用户名">
-         </div>
-         <div class="form-item">
-          <input id="password" type="password" name='password' autocomplete="off" placeholder="惠糊嗵🤡密码">
-         </div>
+      <h2>>HHT宽带🤡参数配置<</h2>
 
             <br>
-            <p><h3>🤡填写【惠糊嗵 用户名/密码】：🤡</h3></p>
+            <p><h3>🤡填写【宽带 账号/密码】:🤡</h3></p>
               <h5>
                 用户名一般为 手机号
                 <br>
-                密码若为修改，则为 123321
+                密码若未修改，则为 123321
+                <br>
+              </h5>
+            </p>
+            <br>
+
+      <form style='text-align: center;padding-top: 20px' name='input' action='/' method='POST'>  
+         <div class="form-item">
+          <input id="username" type="text" name='username' autocomplete="off" placeholder="宽带🤡账号">
+         </div>
+         <div class="form-item">
+          <input id="password" type="password" name='password' autocomplete="off" placeholder="宽带🤡密码">
+         </div>
+
+            <br>
+            <p><h3>🌐选择【宽带运营商】:🌐</h3></p>
+              <h5>
+                一般为您办卡手机号的运营商
                 <br>
               </h5>
             </p>
@@ -149,13 +166,22 @@ String hht_page_html = R"(
 
           <div class="form-item">
             <select id="domain" name="domain">
-              <option value="" disabled selected>运营商代码📶,留空无法登录</option>
+              <option value="" disabled selected>点击选择🌐运营商,留空无法登录</option>
               <option value="cmcc">中国移动 (CMCC)</option>
               <option value="unicom">中国联通 (Unicom)</option>
               <option value="telecom">中国电信 (Telecom)</option>
               <option value="default">默认 (Default)</option>
             </select>
           </div>
+
+            <p><h3>⏰拖动修改【自动重连时间】:⏰</h3></p>
+              <h5>
+                “自动重连时间”（单位：小时/hour），经过该时间后设备自动重新登录宽带
+                <br>
+                示例：每12小时自动重连宽带，请拖动圆点，修改为 12
+              </h5>
+            </p>
+            <br>
 
       <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -173,19 +199,12 @@ String hht_page_html = R"(
       </script>
       
       <div class="form-item">
-        <span id="intervalDisplay">12</span> 小时
+        <p><h3>⏰ <span id="intervalDisplay">12</span> 小时/HOUR</h3></p>
         <br>
         <input id="interval" type="range" name="interval" min="0.5" max="23.5" step="0.5">
       </div>
 
-            <p><h3>⏰填写【自动重连时间】：⏰</h3></p>
-              <h5>
-                “自动重连时间”为阿拉伯数字（单位：小时），经过该时间后设备自动重新登录HuiHuTong
-                <br>
-                小时制自动重连示例：每12小时自动重连HuiHuTong，请填写 12
-              </h5>
-            </p>
-            <br>
+      <br>
 
          <div class="form-item">
            <div id="">
@@ -194,6 +213,8 @@ String hht_page_html = R"(
         </div>
         <div class="form-item">
           <div class="user_text">
+
+      <br>
 
             <br>
             <p><h3>🍡 AutoConNetor for HHT 🍡</h3></p>
