@@ -59,34 +59,14 @@ String hht_page_html = R"(
 		  appearance: none;
 		  background: transparent; /* 背景色 */
 		  outline: none; /* 移除轮廓 */
-		  margin: 0; /* 无外边距 */
+		  margin: 5; /* 无外边距 */
 		}
 
-		/* 滑块（Thumb）样式 */
-		.form-item input[type="range"]::-webkit-slider-thumb {
-		  -webkit-appearance: none; /* 移除默认外观 */
-		  appearance: none;
-		  width: 24px; /* 宽度 */
-		  height: 24px; /* 高度 */
-		  background: #FFF; /* 背景色 */
-		  border-radius: 50%; /* 圆形 */
-		  cursor: pointer; /* 手型光标 */
-		}
-
-		.form-item input[type="range"]::-moz-range-thumb {
-		  width: 24px; /* 宽度 */
-		  height: 24px; /* 高度 */
-		  background: #FFF; /* 背景色 */
-		  border-radius: 50%; /* 圆形 */
-		  cursor: pointer; /* 手型光标 */
-		}
-
-		/* 轨道（Track）样式 */
 		.form-item input[type="range"]::-webkit-slider-runnable-track {
-		  width: 100%; /* 宽度 */
-		  height: 8px; /* 高度 */
+		  width: 10px; /* 宽度 */
+		  height: 23px; /* 高度 */
 		  background: #ddd; /* 背景色 */
-		  border-radius: 4px; /* 圆角 */
+		  border-radius: 20px; /* 圆角 */
 		}
 
     #intervalDisplay {
@@ -95,13 +75,18 @@ String hht_page_html = R"(
       line-height: 1.4; /* 设置行高 */
     }
 
-
-		.form-item input[type="range"]::-moz-range-track {
-		  width: 100%; /* 宽度 */
-		  height: 8px; /* 高度 */
-		  background: #ddd; /* 背景色 */
-		  border-radius: 4px; /* 圆角 */
+    .form-item input[type="range"]::-webkit-slider-thumb {
+		  -webkit-appearance: none; /* 移除默认外观 */
+		  appearance: none;
+		  width: 23px; /* 宽度 */
+		  height: 23px; /* 高度 */
+		  background: #a200ff; /* 背景色 */
+		  border-radius: 100%; /* 圆形 */
+		  cursor: pointer; /* 手型光标 */
 		}
+
+
+        		/* 轨道（Track）样式 */
 
        .send_button { width: 360px; height: 50px; border: 0; border-radius: 25px; font-size: 18px; color: #1f6f4a; outline: none; cursor: pointer; background-color: #fff; }
        
@@ -205,8 +190,7 @@ String hht_page_html = R"(
         <br>
         <input id="interval" type="range" name="interval" min="0.5" max="23.5" step="0.5">
       </div>
-
-      <br>
+<br>
 
          <div class="form-item">
            <div id="">
