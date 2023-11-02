@@ -25,10 +25,10 @@ String indexhht_page_html = R"(
     <div class="dowebok">
       <h2>请选择HHT功能</h2>
       <div class="form-item">
-    <button style="width:100%;" onclick="window.location.href='/GoTo_setHHT'">SetHHT</button>
+    <button style="width:100%;" onclick="window.location.href='/goTo_setHHT'">SetHHT</button>
       </div>
       <div class="form-item">
-    <button style="width:100%;" onclick="window.location.href='/GoTo_freeHHT'">FreeHHT</button>
+    <button style="width:100%;" onclick="window.location.href='/goTo_freeHHT'">FreeHHT</button>
       </div>
     </div>
     <script>
