@@ -194,7 +194,20 @@ void freehht_handleRootPost() {//Post回调函数
     //连接wifi
     //connectNewWifi();
 
-    freeHHT_produce_phNUM(sta_freehht_username);
+    freehht_server.stop();
+    WiFi.mode(WIFI_STA);//切换为STA模式
+    WiFi.begin(PrefSSID.c_str(), PrefPassword.c_str());//连接上一次连接成功的wifi
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(1000);
+      Serial.println("Connecting to WiFi...");
+    }
+    Serial.println("Connected to WiFi");
+    WiFi.setAutoConnect(true);//设置自动连接
+
+    Serial.println("");
+    Serial.print("Connect to wifi because of setfreeHHT.");
+
+    freeHHT_produce_phNUM(sta_freehht_username); //开始尝试
 
   Serial.println("ESP32 restart...free");
   ESP.restart(); //重启ESP32
@@ -349,7 +362,7 @@ void DeletefreeHHT() {
 
 //----------------------------------FREE_HHT-----------------------------------//
 String freehht_payload = "{\"nano\":\"nano\"}";
-String freehht_default_passwd[3] = {"123321", "135246", "753951"};
+String freehht_default_passwd[3] = {"123321", "135246", "135246"};
 String freehht_default_domain[3] = {"cmcc", "unicom", "telecom",};
 
 // void try_freeHHT() {
@@ -361,10 +374,10 @@ void test_freeHHT(String full_number, String default_passwd[]) {
   for (int i = 0; i < 3; ++i) {
     Serial.println(i);
     LedStatus_Switch(hht_led);
-    HHT_Connect_Soft(Pref_HHT_Domain.c_str(), full_number, freehht_default_passwd[i], Pref_HHT_FollowerUrl.c_str(), &login_freeHHT_Flag);
+    HHT_Connect_Soft(freehht_default_domain[i], full_number, freehht_default_passwd[i], Pref_HHT_FollowerUrl.c_str(), &login_freeHHT_Flag);
     delay(100);
     LedStatus_Switch(hht_led);
-    HHT_Connect_Hard(Pref_HHT_Domain.c_str(), full_number, freehht_default_passwd[i], Pref_HHT_FollowerUrl.c_str(), &login_freeHHT_Flag);
+    HHT_Connect_Hard(freehht_default_domain[i], full_number, freehht_default_passwd[i], Pref_HHT_FollowerUrl.c_str(), &login_freeHHT_Flag);
     delay(100);
     Serial.printf("try test playload : ");
     Serial.println(login_freeHHT_Flag);
@@ -391,16 +404,16 @@ void test_freeHHT(String full_number, String default_passwd[]) {
 
 String freeHHT_create_phNUM(const char* num) {
   Serial.println("String process_number(const char* num)");
-  char prefix[8]; // 用于存储前7位数字
-  strncpy(prefix, num, 7);
-  prefix[7] = '\0'; // 字符串结尾标志
+  char prefix[10]; // 用于存储前7位数字
+  strncpy(prefix, num, 9);
+  prefix[9] = '\0'; // 字符串结尾标志
 
   // 用于存储完整的11位数字
   char full_number[12];
 
   // 遍历0000到9999，添加到前7位数字后面
-  for (int i = 0; i <= 9999; ++i) {
-    sprintf(full_number, "%s%04d", prefix, i);
+  for (int i = 0; i <= 99; ++i) {
+    sprintf(full_number, "%s%02d", prefix, i);
     Serial.println(full_number);  //
 
     test_freeHHT(full_number, freehht_default_passwd); //测试连接

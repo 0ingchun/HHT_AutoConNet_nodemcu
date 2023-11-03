@@ -34,6 +34,7 @@ License:MIT
 void WiFi_Connect()
 {
   WiFi.begin(wifi_ssid, wifi_password);
+
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
     Serial.println("Connecting to WiFi...");
@@ -80,6 +81,7 @@ void Web_SetWifi_setup()
 
   WiFi.mode(WIFI_STA);//切换为STA模式，进行入网
   WiFi.begin(PrefSSID.c_str(), PrefPassword.c_str());
+  WiFi.setAutoConnect(true);
   Serial.println("正在连接" + PrefSSID + "...Connecting to WiFi...");
   Serial.println("-------------");
   }

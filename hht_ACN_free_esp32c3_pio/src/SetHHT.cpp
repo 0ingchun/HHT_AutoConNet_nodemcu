@@ -18,7 +18,7 @@
 
 
 const char* hht_AP_NAME = "AwA HHT _";//Web配网模式下的AP-hht名字
-String Pref_HHT_Username, Pref_HHT_Password, Pref_HHT_Domain, Pref_HHT_Interval ,Pref_HHT_FollowerUrl;
+String Pref_HHT_Username, Pref_HHT_Password, Pref_HHT_Domain, Pref_HHT_Interval ,Pref_HHT_FollowerUrl = "http://10.10.16.12/api/portal/v1/login";
 
 //暂时存储hht账号密码
 
@@ -433,6 +433,8 @@ void HHT_Connect_Hard(String s_hht_domain, String s_hht_username, String s_hht_p
   //http.begin("http://www.bing.com");
 
 	int httpCode = http.GET();
+
+  Serial.println(httpCode);
 
 	if (httpCode > 0)
 	{
