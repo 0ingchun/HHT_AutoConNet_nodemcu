@@ -237,6 +237,7 @@ Serial.println("-------wdf?------");
     hht_followerUrl = Pref_HHT_FollowerUrl.c_str();
     hht_interval = Pref_HHT_Interval.c_str();
 
+  HHT_Logout();
   HHT_Connect_loop();
 
   // byte j = 0;
@@ -413,26 +414,55 @@ void reset_detect()
     
     //延时防抖并闪灯
     delay(750);
-    LedStatus_Switch(wifi_led);
+    LedStatus_Quench(hht_led);
+    LedStatus_Quench(wifi_led);
     delay(750);
-    LedStatus_Switch(wifi_led);
+    LedStatus_Light(hht_led);
+    LedStatus_Light(wifi_led);
+    delay(750);
+    LedStatus_Quench(hht_led);
+    LedStatus_Quench(wifi_led);
     delay(750);
     if(!digitalRead(bootPin) /* || analogRead(resetPin) == 0 || analogRead(resetPin) == 4095 || analogRead(resetPin) <= 600 */ ) 
     { //1Kde 下来电阻，10K的拉不动  
-      LedStatus_Switch(hht_led);
+      LedStatus_Light(hht_led);
       delay(750);
-      LedStatus_Switch(hht_led);
-    // delay(3000);
-    
+      LedStatus_Quench(hht_led);
+      delay(750);
       if(!digitalRead(bootPin) /* || analogRead(resetPin) == 0 || analogRead(resetPin) == 4095 || analogRead(resetPin) <= 600 */ ) 
       { //1Kde 下来电阻，10K的拉不动  
-        Serial.println("\nThe key has been pressed and held for 3 seconds. It is clearing the information saved by NVS.");
+        Serial.println("\nHHT : It is clearing the information saved by NVS.");
         DeleteHHT();      //删除保存的hht信息
-        DeleteWiFi();    //删除保存的wifi信息 
-        Serial.println("Start to Reboot.");
-        ESP.restart();    //重启复位esp32
-        Serial.println("RebootED !");
+        LedStatus_Blink(hht_led, 500);
+        LedStatus_Blink(hht_led, 500);
+        LedStatus_Blink(hht_led, 500);
       }
+
+      LedStatus_Light(wifi_led);
+      delay(750);
+      LedStatus_Quench(wifi_led);
+      delay(750);
+      if(!digitalRead(bootPin) /* || analogRead(resetPin) == 0 || analogRead(resetPin) == 4095 || analogRead(resetPin) <= 600 */ ) 
+      { //1Kde 下来电阻，10K的拉不动  
+        Serial.println("\nWiFi : It is clearing the information saved by NVS.");
+        DeleteWiFi();      //删除保存的hht信息
+        LedStatus_Blink(wifi_led, 500);
+        LedStatus_Blink(wifi_led, 500);
+        LedStatus_Blink(wifi_led, 500);
+      }
+
+      for (int ii=0; ii<8; ii++){
+        delay(100);
+        LedStatus_Quench(hht_led);
+        LedStatus_Quench(wifi_led);
+        delay(100);
+        LedStatus_Light(hht_led);
+        LedStatus_Light(wifi_led);
+      }
+
+      Serial.println("Start to Reboot.");
+      ESP.restart();    //重启复位esp32
+      Serial.println("RebootED !");
     }
   }
 }

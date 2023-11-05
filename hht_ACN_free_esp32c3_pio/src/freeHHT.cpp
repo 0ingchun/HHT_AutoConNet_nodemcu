@@ -371,6 +371,8 @@ String freehht_default_domain[3] = {"cmcc", "unicom", "telecom",};
 
 void test_freeHHT(String full_number, String default_passwd[]) {
   Serial.println("into test_freeHHT(String full_number, String default_passwd[])");
+  
+  HHT_Logout();
   for (int i = 0; i < 3; ++i) {
     Serial.println(i);
     LedStatus_Switch(hht_led);

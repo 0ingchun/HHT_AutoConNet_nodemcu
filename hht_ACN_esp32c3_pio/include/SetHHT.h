@@ -46,6 +46,8 @@ void HHT_Connect_Soft(String hht_domain, String hht_username, String hht_passwor
 
 void HHT_Connect_Hard(String hht_domain, String hht_username, String hht_password, String hht_followerUrl, bool* p_login_HHT_Flag);
 
+void HHT_Logout(void);
+
 void HHT_Connect_ping(bool* p_login_HHT_Flag);
 
 void HHT_Connect_Both(void);

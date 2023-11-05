@@ -508,6 +508,42 @@ void HHT_Connect_Hard(String s_hht_domain, String s_hht_username, String s_hht_p
   }
 }
 
+void HHT_Logout(void)
+{
+  Serial.println("void HHT_Logout()");
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    http.begin("http://10.10.16.12/api/portal/v1/logout"); // Specify the URL
+
+    // Add headers
+    http.addHeader("Accept", "application/json, text/javascript, */*; q=0.01");
+    http.addHeader("Accept-Language", "zh-CN,zh;q=0.9");
+    http.addHeader("Connection", "keep-alive");
+    http.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+    http.addHeader("Origin", "http://10.10.16.12");
+    http.addHeader("Referer", "http://10.10.16.12/portal/");
+    http.addHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36");
+    http.addHeader("X-Requested-With", "XMLHttpRequest");
+
+    // Send the HTTP POST request
+    int httpResponseCode = http.POST("{\"domain\":\"default\"}");
+
+    // If you get a response, print it out
+    if (httpResponseCode > 0) {
+      Serial.print("HTTP Response code: ");
+      Serial.println(httpResponseCode);
+      String payload = http.getString();
+      Serial.println(payload);
+    }
+    else {
+      Serial.print("Error code: ");
+      Serial.println(httpResponseCode);
+    }
+    // Free resources
+    http.end();
+  }
+}
+
 void HHT_Connect_ping(bool* p_login_HHT_Flag)
 {
   Serial.println("void HHT_Connect_ping()");
