@@ -18,7 +18,7 @@
 #include "freeHHT_html.h"
 
 
-const char* freehht_AP_NAME = "XoX HHT _";//Web配网模式下的AP-hht名字
+const char* freehht_AP_NAME = "XoX freeHHT _";//Web配网模式下的AP-hht名字
 String Pref_freeHHT_Username, Pref_freeHHT_Password, Pref_freeHHT_Domain, Pref_freeHHT_Interval ,Pref_freeHHT_FollowerUrl;
 
 //暂时存储hht账号密码

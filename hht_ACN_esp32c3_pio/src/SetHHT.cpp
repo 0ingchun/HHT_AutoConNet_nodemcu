@@ -605,6 +605,9 @@ void HHT_Connect_ping(bool* p_login_HHT_Flag)
 void HHT_Connect_Both()
 {
   Serial.println("void HHT_Connect_Both()");
+
+  HHT_Logout();
+
   LedStatus_Switch(hht_led);
   HHT_Connect_Soft(Pref_HHT_Domain.c_str(), Pref_HHT_Username.c_str(), Pref_HHT_Password.c_str(), Pref_HHT_FollowerUrl.c_str(), &login_HHT_Flag);
   delay(100);

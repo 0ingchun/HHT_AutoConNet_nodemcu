@@ -244,7 +244,6 @@ Serial.println("-------wdf?------");
     hht_followerUrl = Pref_HHT_FollowerUrl.c_str();
     hht_interval = Pref_HHT_Interval.c_str();
 
-  HHT_Logout();
   HHT_Connect_loop();
 
   // byte j = 0;
