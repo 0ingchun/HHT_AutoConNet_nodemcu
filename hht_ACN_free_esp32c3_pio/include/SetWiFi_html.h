@@ -100,7 +100,7 @@ String wifi_page_html = R"(
             <p><h3>🍡 AutoConNetor for HHT 🍡</h3></p>
             <p>
               <h5>
-              HuiHuTong自动登录器 - Powered by 0.C.
+              HuiHuTong自动登录器v1.1 - Powered by 0.C.
               </h5>
             </p>
 

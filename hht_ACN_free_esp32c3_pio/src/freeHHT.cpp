@@ -70,7 +70,7 @@ unsigned long lastGetTime_SetfreeHHT = 0;
 bool setfreeHHT_Flag = false;
 bool login_freeHHT_Flag = false;
 
-void freehht_handleRoot() {//访问主页回调函数
+void freehht_handleRoot(void) {//访问主页回调函数
   lastGetTime_SetfreeHHT = millis();  // 更新最后连接时间
   LedStatus_Light(hht_led);
   Serial.print("lastGetTime_SetfreeHHT: ");

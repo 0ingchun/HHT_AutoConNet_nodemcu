@@ -32,7 +32,7 @@ typedef struct numNode_t {
 
 String generate_freeurl(void);
 
-void freehht_handleRoot();  //访问主页回调函数
+void freehht_handleRoot(void);  //访问主页回调函数
 
 void freehht_initSoftAP(void);  //初始化AP模式
 
