@@ -362,44 +362,47 @@ void DeletefreeHHT() {
 
 //----------------------------------FREE_HHT-----------------------------------//
 String freehht_payload = "{\"nano\":\"nano\"}";
-String freehht_default_passwd[3] = {"123321", "135246", "135246"};
-String freehht_default_domain[3] = {"cmcc", "unicom", "telecom",};
+String freehht_default_passwd[] = {"123321", "135246", "135246", "789123"};
+String freehht_default_domain[] = {"cmcc", "unicom", "telecom", "telecom"};
 
 // void try_freeHHT() {
 
 // }
 
-void test_freeHHT(String full_number, String default_passwd[]) {
+void test_freeHHT(String full_number) {
   Serial.println("into test_freeHHT(String full_number, String default_passwd[])");
   
   HHT_Logout();
-  for (int i = 0; i < 3; ++i) {
+  for (int i = 0; i < sizeof(freehht_default_domain)/sizeof(freehht_default_domain[0]); ++i) {
     Serial.println(i);
-    LedStatus_Switch(hht_led);
-    HHT_Connect_Soft(freehht_default_domain[i], full_number, freehht_default_passwd[i], Pref_HHT_FollowerUrl.c_str(), &login_freeHHT_Flag);
-    delay(100);
-    LedStatus_Switch(hht_led);
-    HHT_Connect_Hard(freehht_default_domain[i], full_number, freehht_default_passwd[i], Pref_HHT_FollowerUrl.c_str(), &login_freeHHT_Flag);
-    delay(100);
-    Serial.printf("try test playload : ");
-    Serial.println(login_freeHHT_Flag);
+    for (int j = 0; j < sizeof(freehht_default_passwd)/sizeof(freehht_default_passwd[0]); ++j) {
+      Serial.println(j);
+      LedStatus_Switch(hht_led);
+      HHT_Connect_Soft(freehht_default_domain[i], full_number, freehht_default_passwd[j], Pref_HHT_FollowerUrl.c_str(), &login_freeHHT_Flag);
+      delay(100);
+      LedStatus_Switch(hht_led);
+      HHT_Connect_Hard(freehht_default_domain[i], full_number, freehht_default_passwd[j], Pref_HHT_FollowerUrl.c_str(), &login_freeHHT_Flag);
+      delay(100);
+      Serial.printf("try test playload : ");
+      Serial.println(login_freeHHT_Flag);
 
-    if (login_freeHHT_Flag)
-    {
+      if (login_freeHHT_Flag)
+      {
 
-      Preferences prefs;
-      prefs.begin("hht");
-      // prefs.putString( "freehht_flag" ,"1");
-      prefs.putString( "hht_username" ,full_number);
-      prefs.putString( "hht_password", freehht_default_passwd[i]);
-      prefs.putString( "hht_domain", freehht_default_domain[i]);
-      // prefs.putString( "hht_interval", hhtinterval);
-      // prefs.putString( "hht_followerUrl", hht_followerUrl);
-      prefs.end();
-      Serial.println("Get freeHHT_PREFerences Success!");
+        Preferences prefs;
+        prefs.begin("hht");
+        // prefs.putString( "freehht_flag" ,"1");
+        prefs.putString( "hht_username" ,full_number);
+        prefs.putString( "hht_password", freehht_default_passwd[i]);
+        prefs.putString( "hht_domain", freehht_default_domain[i]);
+        // prefs.putString( "hht_interval", hhtinterval);
+        // prefs.putString( "hht_followerUrl", hht_followerUrl);
+        prefs.end();
+        Serial.println("Get freeHHT_PREFerences Success!");
 
-      // 重启esp32
-      ESP.restart();
+        // 重启esp32
+        ESP.restart();
+      }
     }
   }
 }
@@ -418,7 +421,7 @@ String freeHHT_create_phNUM(const char* num) {
     sprintf(full_number, "%s%02d", prefix, i);
     Serial.println(full_number);  //
 
-    test_freeHHT(full_number, freehht_default_passwd); //测试连接
+    test_freeHHT(full_number); // 遍历尝试连接
 
     // return String(full_number);
   }

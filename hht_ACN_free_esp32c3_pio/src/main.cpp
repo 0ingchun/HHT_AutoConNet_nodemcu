@@ -523,7 +523,10 @@ void setup() {
   Serial.begin(115200);
   delay(500);
 
-  // delay(1000000000);
+  Serial.println("/////////////////////////");
+  Serial.println("//  HHT AutoConnecter  //");
+  Serial.println("//      v1.1 FREE      //");
+  Serial.println("/////////////////////////");
 
   LedStatus_Quench(wifi_led);
   LedStatus_Quench(hht_led);
